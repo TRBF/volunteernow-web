@@ -14,7 +14,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <BrowserRouter>
+      <BrowserRouter basename="/volunteernow-web">
         <App />
       </BrowserRouter>
     </LocalizationProvider>
