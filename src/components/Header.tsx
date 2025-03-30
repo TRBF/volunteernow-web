@@ -143,25 +143,28 @@ const Header: React.FC<HeaderProps> = ({
       {!searchDrawerOpen ? (
         <Box
           sx={{
-            width: isCollapsed ? 72 : sidebarWidth,
-            height: '100vh',
+            width: { xs: '100%', md: isCollapsed ? 72 : sidebarWidth },
+            height: { xs: 'auto', md: '100vh' },
             position: 'fixed',
-            left: 0,
-            top: 0,
+            left: { xs: 0, md: 0 },
+            top: { xs: 'auto', md: 0 },
+            bottom: { xs: 0, md: 'auto' },
             backgroundColor: 'white',
-            borderRight: '1px solid',
+            borderRight: { xs: 0, md: '1px solid' },
+            borderTop: { xs: '1px solid', md: 0 },
             borderColor: 'divider',
             display: 'flex',
-            flexDirection: 'column',
-            p: isCollapsed ? 1.5 : 3,
+            flexDirection: { xs: 'row', md: 'column' },
+            p: { xs: 1, md: isCollapsed ? 1.5 : 3 },
             transition: theme.transitions.create(['width', 'padding'], {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,
             }),
+            zIndex: 1200,
           }}
         >
           <Box sx={{ 
-            display: 'flex', 
+            display: { xs: 'none', md: 'flex' }, 
             alignItems: 'center', 
             justifyContent: 'space-between', 
             mb: 4,
@@ -187,6 +190,7 @@ const Header: React.FC<HeaderProps> = ({
             <IconButton 
               onClick={() => setIsCollapsed(!isCollapsed)}
               sx={{ 
+                display: { xs: 'none', md: 'flex' },
                 color: 'text.secondary',
                 '&:hover': {
                   backgroundColor: 'transparent',
@@ -197,9 +201,22 @@ const Header: React.FC<HeaderProps> = ({
             </IconButton>
           </Box>
 
-          <List sx={{ flex: 1, px: isCollapsed ? 0 : 1 }}>
+          <List sx={{ 
+            flex: 1,
+            px: { xs: 0, md: isCollapsed ? 0 : 1 },
+            display: 'flex',
+            flexDirection: { xs: 'row', md: 'column' },
+            justifyContent: { xs: 'space-around', md: 'flex-start' },
+            width: '100%'
+          }}>
             {showSearch && (
-              <ListItem disablePadding sx={{ mb: 1 }}>
+              <ListItem 
+                disablePadding 
+                sx={{ 
+                  mb: { xs: 0, md: 1 },
+                  width: { xs: 'auto', md: '100%' }
+                }}
+              >
                 <ListItemButton 
                   onClick={handleSearchOpen}
                   sx={{
@@ -215,13 +232,14 @@ const Header: React.FC<HeaderProps> = ({
                     <SearchIcon 
                       sx={{ 
                         color: searchDrawerOpen ? theme.palette.primary.main : 'text.secondary',
-                        fontSize: 28,
+                        fontSize: { xs: 24, md: 28 },
                       }} 
                     />
                   </ListItemIcon>
                   {!isCollapsed && (
                     <ListItemText 
                       primary="Search"
+                      sx={{ display: { xs: 'none', md: 'block' } }}
                       primaryTypographyProps={{
                         color: searchDrawerOpen ? 'primary' : 'text.primary',
                         fontWeight: searchDrawerOpen ? 600 : 400,
@@ -232,7 +250,14 @@ const Header: React.FC<HeaderProps> = ({
               </ListItem>
             )}
             {menuItems.map((item) => (
-              <ListItem key={item.path} disablePadding sx={{ mb: 1 }}>
+              <ListItem 
+                key={item.path} 
+                disablePadding 
+                sx={{ 
+                  mb: { xs: 0, md: 1 },
+                  width: { xs: 'auto', md: '100%' }
+                }}
+              >
                 <ListItemButton 
                   onClick={item.onClick}
                   sx={{
@@ -248,13 +273,14 @@ const Header: React.FC<HeaderProps> = ({
                     <item.icon
                       sx={{ 
                         color: isActive(item.path) ? theme.palette.primary.main : 'text.secondary',
-                        fontSize: 28,
+                        fontSize: { xs: 24, md: 28 },
                       }} 
                     />
                   </ListItemIcon>
                   {!isCollapsed && (
                     <ListItemText 
                       primary={item.label}
+                      sx={{ display: { xs: 'none', md: 'block' } }}
                       primaryTypographyProps={{
                         color: isActive(item.path) ? 'primary' : 'text.primary',
                         fontWeight: isActive(item.path) ? 600 : 400,
@@ -266,13 +292,12 @@ const Header: React.FC<HeaderProps> = ({
             ))}
           </List>
 
-          <Divider sx={{ mb: 2 }} />
-
           <Button
             color="inherit"
             startIcon={<LogoutIcon />}
             onClick={handleLogout}
             sx={{ 
+              display: { xs: 'none', md: 'flex' },
               mt: 'auto',
               mb: 2,
               justifyContent: isCollapsed ? 'center' : 'flex-start',
