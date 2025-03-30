@@ -1,6 +1,6 @@
 {
   "files": {
-    "main.js": "/volunteernow-web/static/js/main.8ffe7bfe.js",
+    "main.js": "/volunteernow-web/static/js/main.7e4764a2.js",
     "static/js/220.bcd6d5f5.chunk.js": "/volunteernow-web/static/js/220.bcd6d5f5.chunk.js",
     "static/js/586.3a9d5af6.chunk.js": "/volunteernow-web/static/js/586.3a9d5af6.chunk.js",
     "static/js/880.233b4c96.chunk.js": "/volunteernow-web/static/js/880.233b4c96.chunk.js",
@@ -18,7 +18,7 @@
     "static/js/666.5590c566.chunk.js": "/volunteernow-web/static/js/666.5590c566.chunk.js",
     "static/js/903.0e2b837e.chunk.js": "/volunteernow-web/static/js/903.0e2b837e.chunk.js",
     "index.html": "/volunteernow-web/index.html",
-    "main.8ffe7bfe.js.map": "/volunteernow-web/static/js/main.8ffe7bfe.js.map",
+    "main.7e4764a2.js.map": "/volunteernow-web/static/js/main.7e4764a2.js.map",
     "220.bcd6d5f5.chunk.js.map": "/volunteernow-web/static/js/220.bcd6d5f5.chunk.js.map",
     "586.3a9d5af6.chunk.js.map": "/volunteernow-web/static/js/586.3a9d5af6.chunk.js.map",
     "880.233b4c96.chunk.js.map": "/volunteernow-web/static/js/880.233b4c96.chunk.js.map",
@@ -37,6 +37,6 @@
     "903.0e2b837e.chunk.js.map": "/volunteernow-web/static/js/903.0e2b837e.chunk.js.map"
   },
   "entrypoints": [
-    "static/js/main.8ffe7bfe.js"
+    "static/js/main.7e4764a2.js"
   ]
 }
