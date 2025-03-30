@@ -33,6 +33,7 @@ const Home = () => {
             display: 'flex',
             justifyContent: 'center',
             py: 3,
+            px: 2,
           }}
         >
           <Container 
@@ -41,7 +42,8 @@ const Home = () => {
               display: 'flex',
               maxWidth: '1024px', // Instagram-like max width
               gap: 8, // Increased from 3 to 8 for more spacing
-              px: 2,
+              justifyContent: 'center',
+              alignItems: 'flex-start',
             }}
           >
             <Box 

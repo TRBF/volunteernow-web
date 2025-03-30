@@ -6,9 +6,36 @@ const Applications = () => {
   return (
     <Box sx={{ minHeight: '100vh' }}>
       <Header showSearch={true} />
-      <Box component="main" sx={{ flexGrow: 1, ml: '280px', p: 3 }}>
-        <Container maxWidth="lg" sx={{ py: 6 }}>
-          <Paper elevation={3} sx={{ p: 4 }}>
+      <Box 
+        component="main" 
+        sx={{ 
+          flexGrow: 1, 
+          ml: '280px', 
+          p: 3,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+        }}
+      >
+        <Container 
+          maxWidth="lg" 
+          sx={{ 
+            py: 6,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            maxWidth: '1024px',
+          }}
+        >
+          <Paper 
+            elevation={3} 
+            sx={{ 
+              p: 4,
+              width: '100%',
+              maxWidth: '800px',
+              borderRadius: 2,
+            }}
+          >
             <Typography variant="h4" gutterBottom>
               Applications
             </Typography>
