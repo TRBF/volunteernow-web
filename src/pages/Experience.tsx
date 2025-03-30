@@ -180,7 +180,25 @@ const Experience: React.FC = () => {
         ))}
       </Stack>
 
-      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+      <Dialog 
+        open={open} 
+        onClose={handleClose} 
+        maxWidth="sm" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '90%',
+            maxWidth: '600px',
+            m: 0,
+            p: 2,
+            borderRadius: 2
+          }
+        }}
+      >
         <DialogTitle>Add New Experience</DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 2 }}>
