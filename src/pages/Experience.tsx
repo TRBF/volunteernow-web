@@ -216,19 +216,19 @@ const Experience: React.FC = () => {
               onChange={(e) => setNewExperience(prev => ({ ...prev, role: e.target.value }))}
               margin="normal"
             />
-            <Box sx={{ mt: 2, mb: 2 }}>
+            <Box sx={{ mt: 2, mb: 2, display: 'flex', gap: 2 }}>
               <DatePicker
                 label="Start Date"
                 value={newExperience.startDate}
                 onChange={(date) => setNewExperience(prev => ({ ...prev, startDate: date }))}
+                sx={{ width: '48%' }}
               />
-              <Box sx={{ display: 'inline-block', ml: 2 }}>
-                <DatePicker
-                  label="End Date"
-                  value={newExperience.endDate}
-                  onChange={(date) => setNewExperience(prev => ({ ...prev, endDate: date }))}
-                />
-              </Box>
+              <DatePicker
+                label="End Date"
+                value={newExperience.endDate}
+                onChange={(date) => setNewExperience(prev => ({ ...prev, endDate: date }))}
+                sx={{ width: '48%' }}
+              />
             </Box>
             <TextField
               fullWidth
