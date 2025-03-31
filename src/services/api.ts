@@ -14,7 +14,7 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers.Authorization = `Token ${token}`;
   }
   return config;
 });
@@ -142,27 +142,46 @@ export const profileService = {
   //   count: number
   // }
   getUserProfileById: async (userId: number) => {
-    const response = await api.get(`/get_user_profile/${userId}`);
+    const response = await api.get(`/get_user_profile_by_id/${userId}?format=json`);
     return response.data;
+  },
+
+  getUserProfilePictureById: async (userId: number) => {
+    const response = await api.get(`/get_user_profile_by_id/${userId}?format=json`);
+    console.log("url: " + MEDIA_BASE_URL + response.data["profile_picture"]);
+    return MEDIA_BASE_URL + response.data["profile_picture"];
   },
 
   // Expected response: Same as getUserProfileById
   updateProfile: async (profileData: {
+    username?: string;
     first_name?: string;
     last_name?: string;
-    bio?: string;
-    skills?: string[];
-    interests?: string[];
+    description?: string;
   }) => {
-    const response = await api.patch('/update_profile/', profileData);
+    // Update user data
+    await api.put('/update_user/', {
+      username: profileData.username,
+      first_name: profileData.first_name,
+      last_name: profileData.last_name,
+    });
+
+    // Update profile data
+    await api.put('/update_user_profile/', {
+      description: profileData.description,
+    });
+
+    // Return updated profile
+    const userId = localStorage.getItem('user_id');
+    const response = await api.get(`/get_user_profile_by_id/${userId}?format=json`);
     return response.data;
   },
 
   // Expected response: { profile_picture: string }
-  updateProfilePicture: async (file: File) => {
+  updateProfilePicture: async (file: File, userId: number) => {
     const formData = new FormData();
     formData.append('profile_picture', file);
-    const response = await api.patch('/update_profile/', formData, {
+    const response = await api.put(`/update_user_pfp/`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -174,60 +193,101 @@ export const profileService = {
 // Experience Service
 export const experienceService = {
   // Expected response: Array of {
-  //   id: number,
-  //   title: string,
+  //   id: string,
+  //   role: string,
+  //   organiser: string,
   //   description: string,
-  //   date: string,
-  //   skills: string[],
-  //   impact: string,
-  //   images: string[]
+  //   start_date: string,
+  //   end_date: string,
+  //   hours: string,
+  //   participation_picture?: string
   // }
   getExperiences: async () => {
-    const response = await api.get('/get_experiences/');
+    const userId = localStorage.getItem('user_id');
+    if (!userId) throw new Error('User not logged in');
+    const response = await api.get(`/get_user_added_participations/${userId}/`);
     return response.data;
   },
 
-  // Expected response: Same as getExperiences but filtered for current user
-  getUserExperience: async () => {
-    const response = await api.get('/get_user_experiences/');
+  // Expected response: Same as getExperiences but filtered for specified user
+  getUserExperience: async (userId: number) => {
+    const response = await api.get(`/get_user_added_participations/${userId}/`);
     return response.data;
   },
 
   // Expected response: Same as single item in getExperiences
   addExperience: async (experienceData: {
-    title: string;
+    role: string;
+    organiser: string;
     description: string;
-    date: string;
-    skills: string[];
-    impact: string;
-    images?: File[];
     startDate?: Date;
     endDate?: Date;
-    organization?: string;
-    role?: string;
+    hours: string;
   }) => {
-    const formData = new FormData();
-    Object.entries(experienceData).forEach(([key, value]) => {
-      if (key === 'images' && Array.isArray(value)) {
-        const files = (value as unknown[]).filter((item: unknown): item is File => item instanceof File);
-        files.forEach((file: File) => {
-          formData.append('images', file);
-        });
-      } else {
-        formData.append(key, JSON.stringify(value));
-      }
-    });
-    const response = await api.post('/add_experience/', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('User not logged in');
+    }
+
+    // Format dates as YYYY-MM-DD
+    const start_date = experienceData.startDate ? experienceData.startDate.toISOString().split('T')[0] : '';
+    const end_date = experienceData.endDate ? experienceData.endDate.toISOString().split('T')[0] : '';
+
+    const response = await api.post('/add_user_added_participation/', {
+      role: experienceData.role,
+      organiser: experienceData.organiser,
+      description: experienceData.description,
+      start_date: start_date,
+      end_date: end_date,
+      hours: experienceData.hours,
     });
     return response.data;
   },
 
   // Expected response: { message: string }
   deleteExperience: async (experienceId: string) => {
-    const response = await api.delete(`/delete_experience/${experienceId}`);
+    const response = await api.delete(`/delete_user_added_participation/${experienceId}/`);
+    return response.data;
+  },
+
+  // Expected response: Same as single item in getExperiences
+  updateExperience: async (experienceId: string, experienceData: {
+    role: string;
+    organiser: string;
+    description: string;
+    startDate?: Date;
+    endDate?: Date;
+    hours: string;
+  }) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('User not logged in');
+    }
+
+    // Format dates as YYYY-MM-DD
+    const start_date = experienceData.startDate ? experienceData.startDate.toISOString().split('T')[0] : '';
+    const end_date = experienceData.endDate ? experienceData.endDate.toISOString().split('T')[0] : '';
+
+    const response = await api.put(`/update_user_added_participation/${experienceId}/`, {
+      role: experienceData.role,
+      organiser: experienceData.organiser,
+      description: experienceData.description,
+      start_date: start_date,
+      end_date: end_date,
+      hours: experienceData.hours,
+    });
+    return response.data;
+  },
+
+  // Expected response: { message: string }
+  updateExperiencePicture: async (experienceId: string, file: File) => {
+    const formData = new FormData();
+    formData.append('user_added_participation_picture', file);
+    const response = await api.put(`/update_user_added_participation_picture/${experienceId}/`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   },
 };
@@ -287,18 +347,48 @@ export const applicationsService = {
 export const archiveService = {
   // Expected response: Array of {
   //   id: number,
-  //   title: string,
+  //   name: string,
   //   description: string,
-  //   date: string,
+  //   time: string,
   //   location: string,
-  //   organization: string,
-  //   impact: string,
-  //   images: string[],
-  //   rating: number
+  //   post_image: string,
+  //   profile_picture: string,
+  //   participation_picture?: string
   // }
   getPastEvents: async () => {
-    const response = await api.get('/get_past_events/');
-    return response.data;
+    try {
+      const userId = localStorage.getItem('user_id');
+      if (!userId) {
+        throw new Error('User not logged in');
+      }
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+
+      console.log('Fetching past events for user:', userId);
+      const response = await api.get(`/get_user_participations/${userId}/?format=json`);
+      console.log('API Response:', response.data);
+
+      if (!response.data) {
+        throw new Error('No data received from server');
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error('Archive service error:', error);
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error('Please log in to view your past participations');
+        }
+        if (error.response?.status === 404) {
+          throw new Error('No past participations found');
+        }
+        throw new Error(error.response?.data?.message || 'Failed to load past events');
+      }
+      throw error;
+    }
   },
 };
 
@@ -333,9 +423,13 @@ export const notificationsService = {
 
 export const searchService = {
   search: async (query: string) => {
-    if (!query) return [];
-    const response = await api.get(`/search/${query}`);
-    return response.data;
+    try {
+      const response = await api.get(`/search/${encodeURIComponent(query)}?format=json`);
+      return response.data;
+    } catch (error) {
+      console.error('Search error:', error);
+      throw error;
+    }
   },
 };
 

@@ -29,25 +29,24 @@ const Home = () => {
           component="main" 
           sx={{ 
             flexGrow: 1, 
-            ml: { xs: 0, md: '240px' }, // Space for sidebar on desktop only
+            ml: '240px', // Space for sidebar
             display: 'flex',
             justifyContent: 'center',
-            py: { xs: 2, md: 3 },
+            py: 3,
           }}
         >
           <Container 
             maxWidth={false}
             sx={{ 
               display: 'flex',
-              flexDirection: { xs: 'column', md: 'row' },
               maxWidth: '1024px', // Instagram-like max width
-              gap: { xs: 4, md: 8 }, // Adjust gap for different screen sizes
-              px: { xs: 1, md: 2 },
+              gap: 8, // Increased from 3 to 8 for more spacing
+              px: 2,
             }}
           >
             <Box 
               sx={{ 
-                width: { xs: '100%', md: '630px' }, // Full width on mobile
+                width: '630px', // Instagram feed width
                 flexShrink: 0,
               }}
             >
@@ -55,12 +54,12 @@ const Home = () => {
             </Box>
             <Box 
               sx={{ 
-                width: { xs: '100%', md: '320px' }, // Full width on mobile
+                width: '320px', // Instagram sidebar width
                 flexShrink: 0,
-                position: { xs: 'static', md: 'sticky' },
+                position: 'sticky',
                 top: 24,
                 height: 'fit-content',
-                display: { xs: 'block', md: 'block' }, // Show on all devices
+                display: { xs: 'none', md: 'block' }, // Hide on mobile
               }}
             >
               <NotificationsPanel />

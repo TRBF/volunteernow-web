@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -16,6 +16,7 @@ import {
   Divider,
   Tabs,
   Tab,
+  CircularProgress,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -31,7 +32,9 @@ import {
   ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { authService } from '../services/api';
+import { authService, searchService } from '../services/api';
+
+const MEDIA_BASE_URL = 'https://api.volunteernow.ro';
 
 interface HeaderProps {
   searchQuery?: string;
@@ -79,6 +82,8 @@ const Header: React.FC<HeaderProps> = ({
   const [tabValue, setTabValue] = useState(0);
   const [opportunityResults, setOpportunityResults] = useState<any[]>([]);
   const [peopleResults, setPeopleResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   const handleLogout = async () => {
     try {
@@ -92,8 +97,44 @@ const Header: React.FC<HeaderProps> = ({
   const handleSearchChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
     setLocalSearchQuery(query);
+    setSearchError(null);
+    
     if (onSearchChange) {
       onSearchChange(query);
+    }
+
+    if (query.trim()) {
+      setIsSearching(true);
+      try {
+        const results = await searchService.search(query);
+        // Process results like the mobile app
+        const processedResults = Array.isArray(results) ? results : [results];
+        const opportunities = processedResults.filter((result: any) => result && result.name);
+        const people = processedResults.filter((result: any) => result && result.username);
+        
+        setOpportunityResults(opportunities.map((opp: any) => ({
+          id: opp.id,
+          title: opp.name,
+          organization: opp.organization,
+          image_url: opp.post_image ? `${MEDIA_BASE_URL}${opp.post_image}` : '',
+        })));
+        
+        setPeopleResults(people.map((person: any) => ({
+          id: person.id,
+          username: person.username,
+          first_name: person.first_name,
+          last_name: person.last_name,
+          profile_picture: person.profile_picture ? `${MEDIA_BASE_URL}${person.profile_picture}` : '',
+        })));
+      } catch (err) {
+        console.error('Search error:', err);
+        setSearchError('Failed to fetch search results');
+        setOpportunityResults([]);
+        setPeopleResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    } else {
       setOpportunityResults([]);
       setPeopleResults([]);
     }
@@ -143,28 +184,25 @@ const Header: React.FC<HeaderProps> = ({
       {!searchDrawerOpen ? (
         <Box
           sx={{
-            width: { xs: '100%', md: isCollapsed ? 72 : sidebarWidth },
-            height: { xs: 'auto', md: '100vh' },
+            width: isCollapsed ? 72 : sidebarWidth,
+            height: '100vh',
             position: 'fixed',
-            left: { xs: 0, md: 0 },
-            top: { xs: 'auto', md: 0 },
-            bottom: { xs: 0, md: 'auto' },
+            left: 0,
+            top: 0,
             backgroundColor: 'white',
-            borderRight: { xs: 0, md: '1px solid' },
-            borderTop: { xs: '1px solid', md: 0 },
+            borderRight: '1px solid',
             borderColor: 'divider',
             display: 'flex',
-            flexDirection: { xs: 'row', md: 'column' },
-            p: { xs: 1, md: isCollapsed ? 1.5 : 3 },
+            flexDirection: 'column',
+            p: isCollapsed ? 1.5 : 3,
             transition: theme.transitions.create(['width', 'padding'], {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,
             }),
-            zIndex: 1200,
           }}
         >
           <Box sx={{ 
-            display: { xs: 'none', md: 'flex' }, 
+            display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'space-between', 
             mb: 4,
@@ -190,7 +228,6 @@ const Header: React.FC<HeaderProps> = ({
             <IconButton 
               onClick={() => setIsCollapsed(!isCollapsed)}
               sx={{ 
-                display: { xs: 'none', md: 'flex' },
                 color: 'text.secondary',
                 '&:hover': {
                   backgroundColor: 'transparent',
@@ -201,22 +238,9 @@ const Header: React.FC<HeaderProps> = ({
             </IconButton>
           </Box>
 
-          <List sx={{ 
-            flex: 1,
-            px: { xs: 0, md: isCollapsed ? 0 : 1 },
-            display: 'flex',
-            flexDirection: { xs: 'row', md: 'column' },
-            justifyContent: { xs: 'space-around', md: 'flex-start' },
-            width: '100%'
-          }}>
+          <List sx={{ flex: 1, px: isCollapsed ? 0 : 1 }}>
             {showSearch && (
-              <ListItem 
-                disablePadding 
-                sx={{ 
-                  mb: { xs: 0, md: 1 },
-                  width: { xs: 'auto', md: '100%' }
-                }}
-              >
+              <ListItem disablePadding sx={{ mb: 1 }}>
                 <ListItemButton 
                   onClick={handleSearchOpen}
                   sx={{
@@ -232,14 +256,13 @@ const Header: React.FC<HeaderProps> = ({
                     <SearchIcon 
                       sx={{ 
                         color: searchDrawerOpen ? theme.palette.primary.main : 'text.secondary',
-                        fontSize: { xs: 24, md: 28 },
+                        fontSize: 28,
                       }} 
                     />
                   </ListItemIcon>
                   {!isCollapsed && (
                     <ListItemText 
                       primary="Search"
-                      sx={{ display: { xs: 'none', md: 'block' } }}
                       primaryTypographyProps={{
                         color: searchDrawerOpen ? 'primary' : 'text.primary',
                         fontWeight: searchDrawerOpen ? 600 : 400,
@@ -250,14 +273,7 @@ const Header: React.FC<HeaderProps> = ({
               </ListItem>
             )}
             {menuItems.map((item) => (
-              <ListItem 
-                key={item.path} 
-                disablePadding 
-                sx={{ 
-                  mb: { xs: 0, md: 1 },
-                  width: { xs: 'auto', md: '100%' }
-                }}
-              >
+              <ListItem key={item.path} disablePadding sx={{ mb: 1 }}>
                 <ListItemButton 
                   onClick={item.onClick}
                   sx={{
@@ -273,14 +289,13 @@ const Header: React.FC<HeaderProps> = ({
                     <item.icon
                       sx={{ 
                         color: isActive(item.path) ? theme.palette.primary.main : 'text.secondary',
-                        fontSize: { xs: 24, md: 28 },
+                        fontSize: 28,
                       }} 
                     />
                   </ListItemIcon>
                   {!isCollapsed && (
                     <ListItemText 
                       primary={item.label}
-                      sx={{ display: { xs: 'none', md: 'block' } }}
                       primaryTypographyProps={{
                         color: isActive(item.path) ? 'primary' : 'text.primary',
                         fontWeight: isActive(item.path) ? 600 : 400,
@@ -292,12 +307,13 @@ const Header: React.FC<HeaderProps> = ({
             ))}
           </List>
 
+          <Divider sx={{ mb: 2 }} />
+
           <Button
             color="inherit"
             startIcon={<LogoutIcon />}
             onClick={handleLogout}
             sx={{ 
-              display: { xs: 'none', md: 'flex' },
               mt: 'auto',
               mb: 2,
               justifyContent: isCollapsed ? 'center' : 'flex-start',
@@ -378,7 +394,18 @@ const Header: React.FC<HeaderProps> = ({
 
           <TabPanel value={tabValue} index={0}>
             <List>
-              {opportunityResults.length > 0 ? (
+              {isSearching ? (
+                <ListItem>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                    <CircularProgress size={20} />
+                    <Typography>Searching opportunities...</Typography>
+                  </Box>
+                </ListItem>
+              ) : searchError ? (
+                <ListItem>
+                  <Typography color="error">{searchError}</Typography>
+                </ListItem>
+              ) : opportunityResults.length > 0 ? (
                 opportunityResults.map((result) => (
                   <ListItem key={result.id} button onClick={() => navigate(`/opportunity/${result.id}`)}>
                     <ListItemAvatar>
@@ -399,7 +426,18 @@ const Header: React.FC<HeaderProps> = ({
           </TabPanel>
           <TabPanel value={tabValue} index={1}>
             <List>
-              {peopleResults.length > 0 ? (
+              {isSearching ? (
+                <ListItem>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                    <CircularProgress size={20} />
+                    <Typography>Searching people...</Typography>
+                  </Box>
+                </ListItem>
+              ) : searchError ? (
+                <ListItem>
+                  <Typography color="error">{searchError}</Typography>
+                </ListItem>
+              ) : peopleResults.length > 0 ? (
                 peopleResults.map((result) => (
                   <ListItem key={result.id} button onClick={() => navigate(`/profile/${result.id}`)}>
                     <ListItemAvatar>

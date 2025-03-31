@@ -13,6 +13,8 @@ import {
   TextField,
   InputAdornment,
   IconButton,
+  Paper,
+  CircularProgress,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -22,183 +24,141 @@ import {
 } from '@mui/icons-material';
 import { archiveService } from '../services/api';
 
+const MEDIA_BASE_URL = 'https://api.volunteernow.ro';
+
 interface PastEvent {
-  id: string;
-  title: string;
-  organization: string;
-  organizationLogo?: string;
-  date: string;
-  location: string;
+  id: number;
+  name: string;
   description: string;
-  impact: string;
-  participants: number;
-  rating: number;
-  images: string[];
-  tags: string[];
+  time: string;
+  location: string;
+  post_image: string;
+  profile_picture: string;
+  participation_picture?: string;
 }
 
-const Archive: React.FC = () => {
-  const [pastEvents, setPastEvents] = useState<PastEvent[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredEvents, setFilteredEvents] = useState<PastEvent[]>([]);
+const Archive = () => {
+  const [events, setEvents] = useState<PastEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadPastEvents();
+    const fetchEvents = async () => {
+      try {
+        setLoading(true);
+        console.log('Fetching past events...');
+        const data = await archiveService.getPastEvents();
+        console.log('Received data:', data);
+        
+        // Check if data is an array
+        if (!Array.isArray(data)) {
+          console.error('Received non-array data:', data);
+          throw new Error('Invalid response format');
+        }
+        
+        setEvents(data);
+        setError(null);
+      } catch (err) {
+        console.error('Detailed error:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load past events');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
   }, []);
 
-  useEffect(() => {
-    filterEvents();
-  }, [searchQuery, pastEvents]);
-
-  const loadPastEvents = async () => {
-    try {
-      const data = await archiveService.getPastEvents();
-      setPastEvents(data);
-    } catch (error) {
-      console.error('Failed to load past events:', error);
-    }
+  const getImageUrl = (path: string | undefined) => {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    return `${MEDIA_BASE_URL}${path}`;
   };
 
-  const filterEvents = () => {
-    const query = searchQuery.toLowerCase();
-    const filtered = pastEvents.filter(event => 
-      event.title.toLowerCase().includes(query) ||
-      event.organization.toLowerCase().includes(query) ||
-      event.description.toLowerCase().includes(query) ||
-      event.tags.some(tag => tag.toLowerCase().includes(query))
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+        <CircularProgress />
+      </Box>
     );
-    setFilteredEvents(filtered);
-  };
+  }
+
+  if (error) {
+    return (
+      <Box display="flex" flexDirection="column" alignItems="center" minHeight="80vh" gap={2}>
+        <Typography color="error" variant="h6">
+          {error}
+        </Typography>
+        <Typography color="text.secondary">
+          Please try refreshing the page or contact support if the issue persists.
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Past Events Archive
-        </Typography>
-        <Typography variant="body1" color="text.secondary" paragraph>
-          Browse through our history of successful volunteer events and their impact.
-        </Typography>
-        <TextField
-          fullWidth
-          variant="outlined"
-          placeholder="Search past events..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="action" />
-              </InputAdornment>
-            ),
-          }}
-          sx={{ maxWidth: 600 }}
-        />
-      </Box>
-
+      <Typography variant="h4" gutterBottom>
+        Past Participations
+      </Typography>
       <Grid container spacing={3}>
-        {filteredEvents.map((event) => (
-          <Grid item xs={12} md={6} key={event.id}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Avatar
-                    src={event.organizationLogo}
-                    sx={{ width: 48, height: 48, mr: 2 }}
-                  >
-                    {event.organization[0]}
-                  </Avatar>
-                  <Box>
-                    <Typography variant="h6">
-                      {event.title}
+        {events.length === 0 ? (
+          <Grid item xs={12}>
+            <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+              <Typography variant="body1" color="text.secondary">
+                No past participations yet
+              </Typography>
+            </Paper>
+          </Grid>
+        ) : (
+          events.map((event) => (
+            <Grid item xs={12} key={event.id}>
+              <Paper elevation={2} sx={{ borderRadius: 2, overflow: 'hidden' }}>
+                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
+                  <Box
+                    component="img"
+                    src={getImageUrl(event.post_image)}
+                    alt={event.name}
+                    sx={{
+                      width: { xs: '100%', md: '300px' },
+                      height: { xs: '200px', md: 'auto' },
+                      objectFit: 'cover',
+                    }}
+                  />
+                  <Box sx={{ p: 3, flex: 1 }}>
+                    <Typography variant="h5" gutterBottom>
+                      {event.name}
                     </Typography>
-                    <Typography variant="subtitle2" color="text.secondary">
-                      {event.organization}
-                    </Typography>
-                  </Box>
-                </Box>
-
-                <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <EventIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                    <Typography variant="body2">
-                      {new Date(event.date).toLocaleDateString()}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <LocationIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                    <Typography variant="body2">
+                    <Typography variant="subtitle1" color="text.secondary" gutterBottom>
                       {event.location}
                     </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <PeopleIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                    <Typography variant="body2">
-                      {event.participants} volunteers
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                      {new Date(event.time).toLocaleDateString()}
                     </Typography>
-                  </Box>
-                </Stack>
-
-                <Typography variant="body1" paragraph>
-                  {event.description}
-                </Typography>
-
-                <Typography variant="subtitle2" gutterBottom>
-                  Impact:
-                </Typography>
-                <Typography variant="body2" paragraph color="text.secondary">
-                  {event.impact}
-                </Typography>
-
-                <Box sx={{ mb: 2 }}>
-                  <Rating value={event.rating} readOnly precision={0.5} />
-                </Box>
-
-                <Box sx={{ mb: 2 }}>
-                  {event.tags.map((tag) => (
-                    <Chip
-                      key={tag}
-                      label={tag}
-                      size="small"
-                      sx={{ mr: 1, mb: 1 }}
-                    />
-                  ))}
-                </Box>
-
-                {event.images.length > 0 && (
-                  <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', pb: 1 }}>
-                    {event.images.map((image, index) => (
+                    <Typography variant="body1" paragraph>
+                      {event.description}
+                    </Typography>
+                    {event.participation_picture && (
                       <Box
-                        key={index}
                         component="img"
-                        src={image}
-                        alt={`Event photo ${index + 1}`}
+                        src={getImageUrl(event.participation_picture)}
+                        alt="Participation"
                         sx={{
-                          width: 120,
-                          height: 80,
+                          width: '100%',
+                          maxHeight: 200,
                           objectFit: 'cover',
                           borderRadius: 1,
+                          mt: 2,
                         }}
                       />
-                    ))}
+                    )}
                   </Box>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
+                </Box>
+              </Paper>
+            </Grid>
+          ))
+        )}
       </Grid>
-
-      {filteredEvents.length === 0 && (
-        <Box sx={{ textAlign: 'center', mt: 4 }}>
-          <Typography variant="h6" color="text.secondary">
-            No past events found
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Try adjusting your search criteria
-          </Typography>
-        </Box>
-      )}
     </Container>
   );
 };

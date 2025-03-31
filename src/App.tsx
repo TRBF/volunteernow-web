@@ -39,13 +39,12 @@ const MainContent: React.FC<MainContentProps> = ({ children }) => {
       sx={{
         flexGrow: 1,
         minHeight: '100vh',
-        ml: { xs: 0, md: '280px' }, // Only apply margin on desktop
-        mb: { xs: '56px', md: 0 }, // Add bottom margin on mobile for the navigation
+        ml: '280px', // Match the expanded sidebar width
         transition: theme.transitions.create('margin', {
           easing: theme.transitions.easing.sharp,
           duration: theme.transitions.duration.enteringScreen,
         }),
-        p: { xs: 2, md: 3 }, // Reduce padding on mobile
+        p: 3,
       }}
     >
       <Fade in={true} timeout={300} key={location.pathname}>
