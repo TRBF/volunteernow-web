@@ -39,41 +39,41 @@ export const opportunityService = {
   //   likes: number
   // }
   getOpportunities: async () => {
-    const response = await api.get('/get_opportunities/');
+      const response = await api.get('/get_opportunities/');
     // Transform the response to match the expected format
     return response.data.map((opportunity: any) => ({
-      id: opportunity.id || '',
-      title: opportunity.name || '', // API returns 'name' instead of 'title'
-      description: opportunity.description || '',
-      image_url: getMediaUrl(opportunity.post_image), // Handle media URL
-      location: opportunity.location || '',
-      date: opportunity.time || '', // API returns 'time' instead of 'date'
-      organization: opportunity.organization || '',
+        id: opportunity.id || '',
+        title: opportunity.name || '', // API returns 'name' instead of 'title'
+        description: opportunity.description || '',
+        image_url: getMediaUrl(opportunity.post_image), // Handle media URL
+        location: opportunity.location || '',
+        date: opportunity.time || '', // API returns 'time' instead of 'date'
+        organization: opportunity.organization || '',
       likes: opportunity.like_count || 0, // API returns 'like_count' instead of 'likes'
-      comments: opportunity.comments || [],
-    }));
+        comments: opportunity.comments || [],
+      }));
   },
 
   // Expected response: Same as single item in getOpportunities
   getOpportunityById: async (opportunityId: string) => {
     const response = await api.get(`/get_opportunity_by_id/${opportunityId}`);
-    const data = response.data;
-    return {
-      id: data.id || '',
-      title: data.name || '',
-      description: data.description || '',
-      image_url: getMediaUrl(data.post_image),
-      location: data.location || '',
-      date: data.time || '',
-      organization: data.organization || '',
-      requirements: Array.isArray(data.requirements) ? data.requirements : [],
-      participants: Array.isArray(data.participants) ? data.participants.map((p: any) => ({
-        id: p.id || '',
-        username: p.username || '',
-        profile_picture: getMediaUrl(p.profile_picture),
-      })) : [],
+      const data = response.data;
+      return {
+        id: data.id || '',
+        title: data.name || '',
+        description: data.description || '',
+        image_url: getMediaUrl(data.post_image),
+        location: data.location || '',
+        date: data.time || '',
+        organization: data.organization || '',
+        requirements: Array.isArray(data.requirements) ? data.requirements : [],
+        participants: Array.isArray(data.participants) ? data.participants.map((p: any) => ({
+          id: p.id || '',
+          username: p.username || '',
+          profile_picture: getMediaUrl(p.profile_picture),
+        })) : [],
       likes: data.like_count || 0,
-      comments: data.comments || [],
+        comments: data.comments || [],
     };
   },
 
@@ -92,10 +92,44 @@ export const opportunityService = {
 
 // Auth Service
 export const authService = {
-  // Expected response: { token: string, user: { id: number, username: string, email: string } }
+  // Expected response: { token: string, user: { id: number, username: string } }
   login: async (credentials: { username: string; password: string }) => {
-    const response = await api.post('/login/', credentials);
-    return response.data;
+    const formData = new FormData();
+    formData.append('username', credentials.username);
+    formData.append('password', credentials.password);
+    
+    const response = await api.post('/get_token/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    if (response.data.token) {
+      // Store the token
+      const token = response.data.token;
+      localStorage.setItem('token', token);
+      
+      // Get user ID
+      const idResponse = await api.get('/get_id/', {
+        headers: {
+          'Authorization': `Token ${token}`
+        }
+      });
+      
+      const userId = idResponse.data.id;
+      localStorage.setItem('user_id', userId.toString());
+      localStorage.setItem('username', credentials.username);
+
+      return {
+        token: token,
+        user: {
+          id: userId,
+          username: credentials.username
+        }
+      };
+    }
+    
+    throw new Error('Login failed');
   },
 
   // Expected response: { token: string, user: { id: number, username: string, email: string } }
@@ -247,7 +281,7 @@ export const experienceService = {
   // Expected response: { message: string }
   deleteExperience: async (experienceId: string) => {
     const response = await api.delete(`/delete_user_added_participation/${experienceId}/`);
-    return response.data;
+      return response.data;
   },
 
   // Expected response: Same as single item in getExperiences
@@ -317,30 +351,75 @@ export const calloutsService = {
   },
 };
 
-// Applications Service
-export const applicationsService = {
-  // Expected response: Array of {
-  //   id: number,
-  //   opportunity: {
-  //     id: number,
-  //     title: string,
-  //     description: string,
-  //     date: string
-  //   },
-  //   status: 'pending' | 'accepted' | 'rejected',
-  //   applied_date: string,
-  //   message: string
-  // }
-  getApplications: async () => {
-    const response = await api.get('/get_applications/');
+// Application Service
+interface Application {
+  id: number;
+  opportunity: number;
+  user: number;
+  status: 'pending' | 'accepted' | 'rejected';
+  submitted_at: string;
+  updated_at: string;
+  answers: ApplicationAnswer[];
+}
+
+interface ApplicationQuestion {
+  id: number;
+  opportunity: number;
+  question_text: string;
+  question_type: 'text' | 'textarea' | 'number' | 'date' | 'select' | 'checkbox';
+  is_required: boolean;
+  order: number;
+  options?: any[];
+}
+
+interface ApplicationAnswer {
+  question: number;
+  answer: string;
+}
+
+export const applicationService = {
+  // Get application form for an opportunity
+  getApplicationForm: async (opportunityId: number): Promise<ApplicationQuestion[]> => {
+    const response = await api.get(`/opportunity/${opportunityId}/application-form/`);
     return response.data;
   },
 
-  // Expected response: Same as single item in getApplications
-  submitApplication: async (opportunityId: string, applicationData: { message: string }) => {
-    const response = await api.post(`/submit_application/${opportunityId}`, applicationData);
+  // Submit an application for an opportunity
+  submitApplication: async (opportunityId: number, answers: ApplicationAnswer[]): Promise<Application> => {
+    const userId = localStorage.getItem('user_id');
+    if (!userId) {
+      throw new Error('User not authenticated');
+    }
+
+    const response = await api.post(`/opportunity/${opportunityId}/apply/`, {
+      answers: answers
+    });
     return response.data;
   },
+
+  // Get all applications for the current user
+  getUserApplications: async (): Promise<Application[]> => {
+    const response = await api.get('/get_user_applications/');
+    return response.data;
+  },
+
+  // Get all applications for a specific opportunity
+  getOpportunityApplications: async (opportunityId: number): Promise<Application[]> => {
+    const response = await api.get(`/get_opportunity_applications/${opportunityId}/`);
+    return response.data;
+  },
+
+  // Update application status (for opportunity owners)
+  updateApplicationStatus: async (applicationId: number, status: 'pending' | 'accepted' | 'rejected'): Promise<Application> => {
+    const response = await api.put(`/update_application_status/${applicationId}/`, { status });
+    return response.data;
+  },
+
+  // Get application questions for an opportunity
+  getApplicationQuestions: async (opportunityId: number): Promise<ApplicationQuestion[]> => {
+    const response = await api.get(`/get_application_questions/${opportunityId}/`);
+    return response.data;
+  }
 };
 
 // Archive Service
@@ -424,8 +503,37 @@ export const notificationsService = {
 export const searchService = {
   search: async (query: string) => {
     try {
-      const response = await api.get(`/search/${encodeURIComponent(query)}?format=json`);
-      return response.data;
+      const response = await api.get(`/search/${query}?format=json`);
+      const results = response.data;
+      
+      // Process results
+      if (!Array.isArray(results)) {
+        return [];
+      }
+
+      return results.map((result: any) => {
+        if (result.name) {
+          // This is an opportunity
+          return {
+            id: result.id,
+            title: result.name,
+            organization: result.organization || '',
+            image_url: result.post_image ? `${MEDIA_BASE_URL}${result.post_image}` : '',
+            type: 'opportunity'
+          };
+        } else if (result.username) {
+          // This is a user
+          return {
+            id: result.id,
+            username: result.username,
+            first_name: result.first_name || '',
+            last_name: result.last_name || '',
+            profile_picture: result.profile_picture ? `${MEDIA_BASE_URL}${result.profile_picture}` : '',
+            type: 'user'
+          };
+        }
+        return null;
+      }).filter(Boolean);
     } catch (error) {
       console.error('Search error:', error);
       throw error;
@@ -440,4 +548,68 @@ export const fileService = {
     const response = await api.post('/upload_file/', formData);
     return response.data;
   },
+};
+
+// Application Form Service
+export const applicationFormService = {
+  getApplicationForm: async (opportunityId: number) => {
+    try {
+      const response = await api.get(`/opportunity/${opportunityId}/application-form/`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching application form:', error);
+      throw error;
+    }
+  },
+
+  submitApplication: async (opportunityId: number, answers: any[]) => {
+    try {
+      const userId = localStorage.getItem('user_id');
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
+
+      const response = await api.post(`/opportunity/${opportunityId}/apply/`, {
+        opportunity: opportunityId,
+        user: parseInt(userId),
+        answers: answers
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      throw error;
+    }
+  },
+
+  getUserApplications: async () => {
+    try {
+      const response = await api.get('/applications/');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching user applications:', error);
+      throw error;
+    }
+  },
+
+  getOpportunityApplications: async (opportunityId: number) => {
+    try {
+      const response = await api.get(`/opportunity/${opportunityId}/applications/`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching opportunity applications:', error);
+      throw error;
+    }
+  },
+
+  updateApplicationStatus: async (applicationId: number, status: 'pending' | 'accepted' | 'rejected') => {
+    try {
+      const response = await api.put(`/application/${applicationId}/status/`, {
+        status
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error updating application status:', error);
+      throw error;
+    }
+  }
 }; 
