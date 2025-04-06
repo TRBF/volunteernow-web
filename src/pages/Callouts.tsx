@@ -5,38 +5,41 @@ import {
   Typography,
   Card,
   CardContent,
-  CardActions,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
   Stack,
-  Chip,
   Avatar,
+  CircularProgress,
+  useTheme,
+  Button,
 } from '@mui/material';
-import { calloutsService } from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import { calloutsService, opportunityService } from '../services/api';
+
+interface Opportunity {
+  id: string;
+  name: string;
+  title: string;
+}
 
 interface Callout {
   id: string;
   title: string;
   organization: string;
   description: string;
-  requiredSkills: string[];
-  deadline: string;
   organizationLogo?: string;
-  urgencyLevel: 'low' | 'medium' | 'high';
+  calloutPicture?: string;
+  opportunity?: {
+    id: string;
+    name: string;
+  };
+  opportunityDetails?: Opportunity;
 }
 
 const Callouts: React.FC = () => {
   const [callouts, setCallouts] = useState<Callout[]>([]);
-  const [selectedCallout, setSelectedCallout] = useState<Callout | null>(null);
-  const [responseDialog, setResponseDialog] = useState(false);
-  const [response, setResponse] = useState({
-    message: '',
-    availability: [] as string[],
-  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const theme = useTheme();
 
   useEffect(() => {
     loadCallouts();
@@ -44,167 +47,145 @@ const Callouts: React.FC = () => {
 
   const loadCallouts = async () => {
     try {
+      setLoading(true);
+      setError(null);
       const data = await calloutsService.getCallouts();
-      setCallouts(data);
+      
+      // Fetch opportunity details for each callout
+      const calloutsWithOpportunities = await Promise.all(
+        data.map(async (callout: Callout) => {
+          if (callout.opportunity?.id) {
+            try {
+              const opportunityDetails = await opportunityService.getOpportunityById(callout.opportunity.id.toString());
+              return {
+                ...callout,
+                opportunityDetails
+              };
+            } catch (error) {
+              console.error(`Failed to fetch opportunity details for ID ${callout.opportunity.id}:`, error);
+              return callout;
+            }
+          }
+          return callout;
+        })
+      );
+      
+      setCallouts(calloutsWithOpportunities);
     } catch (error) {
       console.error('Failed to load callouts:', error);
+      setError('Failed to load callouts. Please try again later.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleRespond = (callout: Callout) => {
-    setSelectedCallout(callout);
-    setResponseDialog(true);
-  };
-
-  const handleCloseDialog = () => {
-    setResponseDialog(false);
-    setSelectedCallout(null);
-    setResponse({
-      message: '',
-      availability: [],
-    });
-  };
-
-  const handleSubmitResponse = async () => {
-    if (!selectedCallout) return;
-    
-    try {
-      await calloutsService.respondToCallout(selectedCallout.id, response);
-      handleCloseDialog();
-      // Optionally refresh the callouts list
-      loadCallouts();
-    } catch (error) {
-      console.error('Failed to submit response:', error);
+  const handleCalloutClick = (callout: Callout) => {
+    if (callout.opportunity?.id) {
+      navigate(`/opportunity/${callout.opportunity.id}`);
     }
   };
 
-  const getUrgencyColor = (level: string) => {
-    switch (level) {
-      case 'high':
-        return 'error';
-      case 'medium':
-        return 'warning';
-      case 'low':
-        return 'success';
-      default:
-        return 'default';
-    }
-  };
+  if (loading) {
+    return (
+      <Container maxWidth="md" sx={{ py: 4, display: 'flex', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Typography color="error" gutterBottom>
+          {error}
+        </Typography>
+        <Button variant="contained" onClick={loadCallouts}>
+          Retry
+        </Button>
+      </Container>
+    );
+  }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Urgent Callouts
-      </Typography>
-      <Typography variant="body1" color="text.secondary" paragraph>
-        Organizations need your help! Respond to these urgent volunteer requests.
-      </Typography>
+    <Container maxWidth="md" sx={{ py: 4 }}>      {callouts.length === 0 ? (
+        <Typography variant="body1" color="text.secondary" align="center" sx={{ py: 4 }}>
+          No updates available at the moment.
+        </Typography>
+      ) : (
+        <Stack spacing={3}>
+          {callouts.map((callout) => (
+            <Card 
+              key={callout.id}
+              onClick={() => handleCalloutClick(callout)}
+              sx={{ 
+                cursor: 'pointer',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: theme.shadows[4],
+                }
+              }}
+            >
+              <Box sx={{ display: 'flex' }}>
+                <Box sx={{ flex: 1 }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                      <Avatar
+                        src={callout.organizationLogo}
+                        sx={{ width: 40, height: 40, mr: 2 }}
+                      >
+                        {callout.organization[0]}
+                      </Avatar>
+                      <Box>
+                        <Typography variant="h6" component="div">
+                          {callout.title}
+                        </Typography>
+                        <Typography variant="subtitle2" color="text.secondary">
+                          {callout.organization}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    
+                    <Typography 
+                      variant="body1" 
+                      color="text.secondary"
+                      sx={{ 
+                        mb: 2,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {callout.description}
+                    </Typography>
 
-      <Stack spacing={2}>
-        {callouts.map((callout) => (
-          <Card key={callout.id}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Avatar
-                  src={callout.organizationLogo}
-                  sx={{ width: 40, height: 40, mr: 2 }}
-                >
-                  {callout.organization[0]}
-                </Avatar>
-                <Box>
-                  <Typography variant="h6">
-                    {callout.title}
-                  </Typography>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    {callout.organization}
-                  </Typography>
+                    {callout.opportunity && (
+                      <Typography variant="body2" color="primary">
+                        View Opportunity: {callout.opportunityDetails?.title || 'Loading...'}
+                      </Typography>
+                    )}
+                  </CardContent>
                 </Box>
-                <Chip
-                  label={`${callout.urgencyLevel} priority`}
-                  color={getUrgencyColor(callout.urgencyLevel)}
-                  size="small"
-                  sx={{ ml: 'auto' }}
-                />
-              </Box>
-              
-              <Typography variant="body1" paragraph>
-                {callout.description}
-              </Typography>
-
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="subtitle2" gutterBottom>
-                  Required Skills:
-                </Typography>
-                {callout.requiredSkills.map((skill) => (
-                  <Chip
-                    key={skill}
-                    label={skill}
-                    size="small"
-                    sx={{ mr: 1, mb: 1 }}
+                {callout.calloutPicture && (
+                  <Box
+                    sx={{
+                      width: 150,
+                      height: 150,
+                      margin: 2,
+                      backgroundImage: `url(${callout.calloutPicture})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      borderRadius: 2,
+                      boxShadow: theme.shadows[1],
+                    }}
                   />
-                ))}
+                )}
               </Box>
-
-              <Typography variant="body2" color="text.secondary">
-                Deadline: {new Date(callout.deadline).toLocaleDateString()}
-              </Typography>
-            </CardContent>
-            <CardActions>
-              <Button
-                variant="contained"
-                onClick={() => handleRespond(callout)}
-                sx={{ ml: 'auto' }}
-              >
-                Respond to Callout
-              </Button>
-            </CardActions>
-          </Card>
-        ))}
-      </Stack>
-
-      <Dialog open={responseDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          Respond to Callout
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ mt: 2 }}>
-            <TextField
-              fullWidth
-              label="Your Message"
-              multiline
-              rows={4}
-              value={response.message}
-              onChange={(e) => setResponse(prev => ({ ...prev, message: e.target.value }))}
-              margin="normal"
-              placeholder="Describe your interest and relevant experience..."
-            />
-            <TextField
-              fullWidth
-              label="Your Availability"
-              multiline
-              rows={2}
-              value={response.availability.join('\n')}
-              onChange={(e) => setResponse(prev => ({
-                ...prev,
-                availability: e.target.value.split('\n').filter(Boolean),
-              }))}
-              margin="normal"
-              placeholder="List your available times (one per line)"
-              helperText="Enter each available time slot on a new line"
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button
-            onClick={handleSubmitResponse}
-            variant="contained"
-            disabled={!response.message || response.availability.length === 0}
-          >
-            Submit Response
-          </Button>
-        </DialogActions>
-      </Dialog>
+            </Card>
+          ))}
+        </Stack>
+      )}
     </Container>
   );
 };

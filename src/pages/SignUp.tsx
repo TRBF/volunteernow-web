@@ -48,23 +48,16 @@ const SignUp = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      console.log('Submitting form data:', formData);
+      console.log('[SignUp] Submitting form data:', formData);
       const success = await authService.signUp(formData);
-      console.log('Signup response:', success);
+      console.log('[SignUp] Signup response:', success);
       if (success) {
         navigate('/');
       } else {
-        setError('Registration failed. Please try again.');
+        console.error('[SignUp] Registration failed');
       }
     } catch (err) {
-      console.error('Signup error:', err);
-      if (err instanceof Error) {
-        setError(`Registration failed: ${err.message}`);
-      } else if (err && typeof err === 'object' && 'message' in err) {
-        setError(`Registration failed: ${(err as { message: string }).message}`);
-      } else {
-        setError('An error occurred. Please try again.');
-      }
+      console.error('[SignUp] Signup error:', err);
     }
   };
 

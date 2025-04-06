@@ -8,6 +8,8 @@ import {
   Button,
   Link,
   Paper,
+  Alert,
+  CircularProgress,
 } from '@mui/material';
 import { authService } from '../services/api';
 
@@ -17,29 +19,47 @@ const Login = () => {
     username: '',
     password: '',
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+    // Clear error when user starts typing
+    if (error) setError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+
     try {
-      const status = await authService.login({
+      // Validate form data
+      if (!formData.username.trim()) {
+        console.error('[Login] Validation failed: Username is required');
+        setIsLoading(false);
+        return;
+      }
+      if (!formData.password.trim()) {
+        console.error('[Login] Validation failed: Password is required');
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('[Login] Attempting login for user:', formData.username);
+      const response = await authService.login({
         username: formData.username,
         password: formData.password
       });
-      if (status === 200) {
-        navigate('/');
-      } else {
-        setError('Invalid username or password');
-      }
+
+      console.log('[Login] Login successful for user:', formData.username);
+      navigate('/');
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      console.error('[Login] Login error:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -78,6 +98,8 @@ const Login = () => {
               autoFocus
               value={formData.username}
               onChange={handleChange}
+              error={!!error && !formData.username.trim()}
+              disabled={isLoading}
             />
             <TextField
               margin="normal"
@@ -90,22 +112,25 @@ const Login = () => {
               autoComplete="current-password"
               value={formData.password}
               onChange={handleChange}
+              error={!!error && !formData.password.trim()}
+              disabled={isLoading}
             />
             {error && (
-              <Typography color="error" sx={{ mt: 1 }}>
+              <Alert severity="error" sx={{ mt: 2, width: '100%' }}>
                 {error}
-              </Typography>
+              </Alert>
             )}
             <Button
               type="submit"
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
+              disabled={isLoading}
             >
-              Sign In
+              {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Sign In'}
             </Button>
             <Box sx={{ textAlign: 'center' }}>
-              <Link component={RouterLink} to="/signup" variant="body2">
+              <Link component={RouterLink} to="/register" variant="body2">
                 {"Don't have an account? Sign Up"}
               </Link>
             </Box>

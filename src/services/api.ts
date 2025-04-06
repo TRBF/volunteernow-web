@@ -332,94 +332,32 @@ export const calloutsService = {
   //   id: number,
   //   title: string,
   //   description: string,
-  //   date: string,
-  //   location: string,
-  //   required_skills: string[],
-  //   priority: 'high' | 'medium' | 'low',
-  //   organization: string,
-  //   status: 'open' | 'closed'
+  //   sender: { id: number, username: string },
+  //   opportunity: { id: number, name: string } | null,
+  //   callout_picture: string | null,
+  //   time: string
   // }
   getCallouts: async () => {
     const response = await api.get('/get_callouts/');
-    return response.data;
+    return response.data.map((callout: any) => ({
+      id: callout.id,
+      title: callout.title,
+      description: callout.description,
+      organization: callout.sender?.user?.username || 'Unknown',
+      organizationLogo: callout.sender?.profile_picture ? getMediaUrl(callout.sender.profile_picture) : undefined,
+      calloutPicture: callout.callout_picture ? getMediaUrl(callout.callout_picture) : undefined,
+      opportunity: callout.opportunity ? {
+        id: callout.opportunity,  // Using the correct opportunity ID from the response
+        name: callout.title
+      } : undefined
+    }));
   },
 
-  // Expected response: Same as single item in getCallouts
+  // Expected response: { message: string }
   respondToCallout: async (calloutId: string, responseData: { message: string }) => {
     const apiResponse = await api.post(`/respond_to_callout/${calloutId}`, responseData);
     return apiResponse.data;
   },
-};
-
-// Application Service
-interface Application {
-  id: number;
-  opportunity: number;
-  user: number;
-  status: 'pending' | 'accepted' | 'rejected';
-  submitted_at: string;
-  updated_at: string;
-  answers: ApplicationAnswer[];
-}
-
-interface ApplicationQuestion {
-  id: number;
-  opportunity: number;
-  question_text: string;
-  question_type: 'text' | 'textarea' | 'number' | 'date' | 'select' | 'checkbox';
-  is_required: boolean;
-  order: number;
-  options?: any[];
-}
-
-interface ApplicationAnswer {
-  question: number;
-  answer: string;
-}
-
-export const applicationService = {
-  // Get application form for an opportunity
-  getApplicationForm: async (opportunityId: number): Promise<ApplicationQuestion[]> => {
-    const response = await api.get(`/opportunity/${opportunityId}/application-form/`);
-    return response.data;
-  },
-
-  // Submit an application for an opportunity
-  submitApplication: async (opportunityId: number, answers: ApplicationAnswer[]): Promise<Application> => {
-    const userId = localStorage.getItem('user_id');
-    if (!userId) {
-      throw new Error('User not authenticated');
-    }
-
-    const response = await api.post(`/opportunity/${opportunityId}/apply/`, {
-      answers: answers
-    });
-    return response.data;
-  },
-
-  // Get all applications for the current user
-  getUserApplications: async (): Promise<Application[]> => {
-    const response = await api.get('/get_user_applications/');
-    return response.data;
-  },
-
-  // Get all applications for a specific opportunity
-  getOpportunityApplications: async (opportunityId: number): Promise<Application[]> => {
-    const response = await api.get(`/get_opportunity_applications/${opportunityId}/`);
-    return response.data;
-  },
-
-  // Update application status (for opportunity owners)
-  updateApplicationStatus: async (applicationId: number, status: 'pending' | 'accepted' | 'rejected'): Promise<Application> => {
-    const response = await api.put(`/update_application_status/${applicationId}/`, { status });
-    return response.data;
-  },
-
-  // Get application questions for an opportunity
-  getApplicationQuestions: async (opportunityId: number): Promise<ApplicationQuestion[]> => {
-    const response = await api.get(`/get_application_questions/${opportunityId}/`);
-    return response.data;
-  }
 };
 
 // Archive Service
@@ -548,68 +486,4 @@ export const fileService = {
     const response = await api.post('/upload_file/', formData);
     return response.data;
   },
-};
-
-// Application Form Service
-export const applicationFormService = {
-  getApplicationForm: async (opportunityId: number) => {
-    try {
-      const response = await api.get(`/opportunity/${opportunityId}/application-form/`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching application form:', error);
-      throw error;
-    }
-  },
-
-  submitApplication: async (opportunityId: number, answers: any[]) => {
-    try {
-      const userId = localStorage.getItem('user_id');
-      if (!userId) {
-        throw new Error('User not authenticated');
-      }
-
-      const response = await api.post(`/opportunity/${opportunityId}/apply/`, {
-        opportunity: opportunityId,
-        user: parseInt(userId),
-        answers: answers
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Error submitting application:', error);
-      throw error;
-    }
-  },
-
-  getUserApplications: async () => {
-    try {
-      const response = await api.get('/applications/');
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching user applications:', error);
-      throw error;
-    }
-  },
-
-  getOpportunityApplications: async (opportunityId: number) => {
-    try {
-      const response = await api.get(`/opportunity/${opportunityId}/applications/`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching opportunity applications:', error);
-      throw error;
-    }
-  },
-
-  updateApplicationStatus: async (applicationId: number, status: 'pending' | 'accepted' | 'rejected') => {
-    try {
-      const response = await api.put(`/application/${applicationId}/status/`, {
-        status
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Error updating application status:', error);
-      throw error;
-    }
-  }
 }; 

@@ -113,26 +113,25 @@ const Experience: React.FC = () => {
 
   const handleSubmit = async () => {
     try {
-      setError(null);
-      
       if (!newExperience.role || !newExperience.organiser || !newExperience.startDate) {
-        setError('Please fill in all required fields');
+        console.error('[Experience] Validation failed: Required fields missing');
         return;
       }
 
       if (!newExperience.hours || parseInt(newExperience.hours) < 0) {
-        setError('Please enter a valid number of hours');
+        console.error('[Experience] Validation failed: Invalid hours value');
         return;
       }
 
       const token = localStorage.getItem('token');
       if (!token) {
-        setError('Please log in to save experiences');
+        console.error('[Experience] User not logged in');
         return;
       }
 
       let experienceId: string;
       if (editingExperience) {
+        console.log('[Experience] Updating existing experience:', editingExperience.id);
         const response = await experienceService.updateExperience(editingExperience.id, {
           role: newExperience.role,
           organiser: newExperience.organiser,
@@ -143,6 +142,7 @@ const Experience: React.FC = () => {
         });
         experienceId = editingExperience.id;
       } else {
+        console.log('[Experience] Creating new experience');
         const response = await experienceService.addExperience({
           role: newExperience.role,
           organiser: newExperience.organiser,
@@ -156,32 +156,24 @@ const Experience: React.FC = () => {
 
       // Upload image if selected
       if (selectedImage) {
+        console.log('[Experience] Uploading experience picture');
         await experienceService.updateExperiencePicture(experienceId, selectedImage);
       }
 
       handleClose();
       loadExperiences();
     } catch (error) {
-      console.error('Failed to save experience:', error);
-      if (error instanceof Error) {
-        if (error.message === 'User not logged in') {
-          setError('Please log in to save experiences');
-        } else {
-          setError(error.message);
-        }
-      } else {
-        setError('Failed to save experience. Please try again.');
-      }
+      console.error('[Experience] Failed to save experience:', error);
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
+      console.log('[Experience] Deleting experience:', id);
       await experienceService.deleteExperience(id);
       loadExperiences();
     } catch (error) {
-      console.error('Failed to delete experience:', error);
-      setError(error instanceof Error ? error.message : 'Failed to delete experience');
+      console.error('[Experience] Failed to delete experience:', error);
     }
   };
 

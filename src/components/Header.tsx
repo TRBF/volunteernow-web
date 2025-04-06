@@ -17,6 +17,10 @@ import {
   Tabs,
   Tab,
   CircularProgress,
+  AppBar,
+  Toolbar,
+  Drawer,
+  Tooltip,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -30,6 +34,7 @@ import {
   Description as ApplicationIcon,
   Archive as ArchiveIcon,
   ArrowBack as ArrowBackIcon,
+  Menu as MenuIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService, searchService } from '../services/api';
@@ -87,10 +92,23 @@ const Header: React.FC<HeaderProps> = ({
 
   const handleLogout = async () => {
     try {
+      // Clear all auth-related data
+      localStorage.removeItem('token');
+      localStorage.removeItem('user_id');
+      localStorage.removeItem('username');
+      
+      // Call the logout endpoint
       await authService.logout();
+      
+      // Navigate to login page
       navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);
+      // Even if the API call fails, we should still clear local data and redirect
+      localStorage.removeItem('token');
+      localStorage.removeItem('user_id');
+      localStorage.removeItem('username');
+      navigate('/login');
     }
   };
 
@@ -107,25 +125,11 @@ const Header: React.FC<HeaderProps> = ({
       setIsSearching(true);
       try {
         const results = await searchService.search(query);
-        // Process results like the mobile app
-        const processedResults = Array.isArray(results) ? results : [results];
-        const opportunities = processedResults.filter((result: any) => result && result.name);
-        const people = processedResults.filter((result: any) => result && result.username);
+        const opportunities = results.filter((result: any) => result.type === 'opportunity');
+        const people = results.filter((result: any) => result.type === 'user');
         
-        setOpportunityResults(opportunities.map((opp: any) => ({
-          id: opp.id,
-          title: opp.name,
-          organization: opp.organization,
-          image_url: opp.post_image ? `${MEDIA_BASE_URL}${opp.post_image}` : '',
-        })));
-        
-        setPeopleResults(people.map((person: any) => ({
-          id: person.id,
-          username: person.username,
-          first_name: person.first_name,
-          last_name: person.last_name,
-          profile_picture: person.profile_picture ? `${MEDIA_BASE_URL}${person.profile_picture}` : '',
-        })));
+        setOpportunityResults(opportunities);
+        setPeopleResults(people);
       } catch (err) {
         console.error('Search error:', err);
         setSearchError('Failed to fetch search results');

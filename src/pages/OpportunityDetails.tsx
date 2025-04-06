@@ -15,16 +15,22 @@ import {
   ListItemAvatar,
   Avatar,
   useTheme,
+  Grid,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import {
   LocationOn,
   CalendarToday,
   Business,
   ArrowBack,
+  Assignment as RequirementsIcon,
+  Group as ParticipantsIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { opportunityService } from '../services/api';
 import Header from '../components/Header';
+import ApplicationForm from '../components/ApplicationForm';
 
 interface Opportunity {
   id: string;
@@ -49,17 +55,22 @@ const OpportunityDetails = () => {
   const [opportunity, setOpportunity] = useState<Opportunity | null>(null);
   const [loading, setLoading] = useState(true);
   const [comment, setComment] = useState('');
+  const [isApplicationFormOpen, setIsApplicationFormOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchOpportunity();
+    if (id) {
+      fetchOpportunityDetails(id);
+    }
   }, [id]);
 
-  const fetchOpportunity = async () => {
+  const fetchOpportunityDetails = async (opportunityId: string) => {
     try {
-      const data = await opportunityService.getOpportunityById(id || '');
+      const data = await opportunityService.getOpportunityById(opportunityId);
       setOpportunity(data);
-    } catch (error) {
-      console.error('Error fetching opportunity:', error);
+    } catch (err) {
+      console.error('Error fetching opportunity details:', err);
+      setError('Failed to load opportunity details');
     } finally {
       setLoading(false);
     }
@@ -76,11 +87,21 @@ const OpportunityDetails = () => {
   };
 
   if (loading) {
-    return <Typography>Loading...</Typography>;
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <CircularProgress />
+      </Box>
+    );
   }
 
-  if (!opportunity) {
-    return <Typography>Opportunity not found</Typography>;
+  if (error || !opportunity) {
+    return (
+      <Box p={3}>
+        <Alert severity="error">
+          {error || 'Failed to load opportunity details'}
+        </Alert>
+      </Box>
+    );
   }
 
   return (
@@ -176,6 +197,7 @@ const OpportunityDetails = () => {
                     variant="contained"
                     fullWidth
                     sx={{ mb: 3 }}
+                    onClick={() => setIsApplicationFormOpen(true)}
                   >
                     Sign Up
                   </Button>
@@ -210,6 +232,14 @@ const OpportunityDetails = () => {
           </Paper>
         </Container>
       </Box>
+
+      {/* Application Form Dialog */}
+      <ApplicationForm
+        open={isApplicationFormOpen}
+        onClose={() => setIsApplicationFormOpen(false)}
+        opportunityId={parseInt(id || '0')}
+        opportunityTitle={opportunity.title}
+      />
     </motion.div>
   );
 };

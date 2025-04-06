@@ -39,7 +39,6 @@ const MainContent: React.FC<MainContentProps> = ({ children }) => {
       sx={{
         flexGrow: 1,
         minHeight: '100vh',
-        ml: '280px', // Match the expanded sidebar width
         transition: theme.transitions.create('margin', {
           easing: theme.transitions.easing.sharp,
           duration: theme.transitions.duration.enteringScreen,
