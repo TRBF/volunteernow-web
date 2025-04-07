@@ -13,6 +13,8 @@ import Header from './components/Header';
 const Login = React.lazy(() => import('./pages/Login'));
 const SignUp = React.lazy(() => import('./pages/SignUp'));
 const Home = React.lazy(() => import('./pages/Home'));
+const ForgotPassword = React.lazy(() => import('./pages/ForgotPassword'));
+const ResetPasswordConfirm = React.lazy(() => import('./pages/ResetPasswordConfirm'));
 const Profile = React.lazy(() => import('./pages/Profile'));
 const OpportunityDetails = React.lazy(() => import('./pages/OpportunityDetails'));
 const Experience = React.lazy(() => import('./pages/Experience'));
@@ -92,6 +94,20 @@ function App() {
             <Fade in={true} timeout={300}>
               <Box>
                 <SignUp />
+              </Box>
+            </Fade>
+          } />
+          <Route path="/forgot-password" element={
+            <Fade in={true} timeout={300}>
+              <Box>
+                <ForgotPassword />
+              </Box>
+            </Fade>
+          } />
+          <Route path="/reset/:uidb64/:token" element={
+            <Fade in={true} timeout={300}>
+              <Box>
+                <ResetPasswordConfirm />
               </Box>
             </Fade>
           } />

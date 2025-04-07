@@ -94,6 +94,9 @@ export const opportunityService = {
 export const authService = {
   // Expected response: { token: string, user: { id: number, username: string } }
   login: async (credentials: { username: string; password: string }) => {
+    // First get CSRF token
+    await api.get('/csrf/');
+    
     const formData = new FormData();
     formData.append('username', credentials.username);
     formData.append('password', credentials.password);
@@ -133,13 +136,31 @@ export const authService = {
   },
 
   // Expected response: { token: string, user: { id: number, username: string, email: string } }
-  register: async (userData: { username: string; email: string; password: string }) => {
+  register: async (userData: { 
+    username: string; 
+    email: string; 
+    password: string;
+    first_name?: string;
+    last_name?: string;
+    gender?: string;
+    birthday?: string;
+    parent_email?: string;
+  }) => {
     const response = await api.post('/register/', userData);
     return response.data;
   },
 
   // Expected response: { token: string, user: { id: number, username: string, email: string } }
-  signUp: async (userData: { username: string; email: string; password: string }) => {
+  signUp: async (userData: { 
+    username: string; 
+    email: string;
+    password: string;
+    first_name?: string;
+    last_name?: string;
+    gender?: string;
+    birthday?: string;
+    parent_email?: string;
+  }) => {
     const response = await api.post('/register/', userData);
     return response.data;
   },
@@ -347,7 +368,24 @@ export const calloutsService = {
       organizationLogo: callout.sender?.profile_picture ? getMediaUrl(callout.sender.profile_picture) : undefined,
       calloutPicture: callout.callout_picture ? getMediaUrl(callout.callout_picture) : undefined,
       opportunity: callout.opportunity ? {
-        id: callout.opportunity,  // Using the correct opportunity ID from the response
+        id: callout.opportunity,
+        name: callout.title
+      } : undefined
+    }));
+  },
+
+  // Get callouts for the current user
+  getUserCallouts: async () => {
+    const response = await api.get('/get_user_callouts/');
+    return response.data.map((callout: any) => ({
+      id: callout.id,
+      title: callout.title,
+      description: callout.description,
+      organization: callout.sender?.user?.username || 'Unknown',
+      organizationLogo: callout.sender?.profile_picture ? getMediaUrl(callout.sender.profile_picture) : undefined,
+      calloutPicture: callout.callout_picture ? getMediaUrl(callout.callout_picture) : undefined,
+      opportunity: callout.opportunity ? {
+        id: callout.opportunity,
         name: callout.title
       } : undefined
     }));
