@@ -84,7 +84,7 @@ const Header: React.FC<HeaderProps> = ({
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchDrawerOpen, setSearchDrawerOpen] = useState(false);
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(1);
   const [opportunityResults, setOpportunityResults] = useState<any[]>([]);
   const [peopleResults, setPeopleResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -179,7 +179,6 @@ const Header: React.FC<HeaderProps> = ({
     { path: '/experience', icon: ExperienceIcon, label: 'My Experience', onClick: () => navigate('/experience') },
     { path: '/callouts', icon: CalloutIcon, label: 'Callouts', onClick: () => navigate('/callouts') },
     { path: '/applications', icon: ApplicationIcon, label: 'Applications', onClick: () => navigate('/applications') },
-    { path: '/archive', icon: ArchiveIcon, label: 'Archive', onClick: () => navigate('/archive') },
     { path: '/profile', icon: PersonIcon, label: 'Profile', onClick: handleProfileClick },
   ];
 
@@ -378,7 +377,7 @@ const Header: React.FC<HeaderProps> = ({
               }}
             />
           </Box>
-
+{/* 
           <Tabs 
             value={tabValue} 
             onChange={handleTabChange} 
@@ -394,7 +393,7 @@ const Header: React.FC<HeaderProps> = ({
           >
             <Tab label="Opportunities" />
             <Tab label="People" />
-          </Tabs>
+          </Tabs> */}
 
           <TabPanel value={tabValue} index={0}>
             <List>

@@ -16,9 +16,20 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { authService } from '../services/api';
 
+// Define the form data interface with proper types
+interface SignUpFormData {
+  username: string;
+  password: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  gender: string;
+  birthday: Date;
+}
+
 const SignUp = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<SignUpFormData>({
     username: '',
     password: '',
     email: '',
@@ -49,7 +60,14 @@ const SignUp = () => {
     e.preventDefault();
     try {
       console.log('[SignUp] Submitting form data:', formData);
-      const success = await authService.signUp(formData);
+      
+      // Convert the formData with Date to API-compatible format with string
+      const apiFormData = {
+        ...formData,
+        birthday: formData.birthday.toISOString().split('T')[0] // Convert Date to YYYY-MM-DD
+      };
+      
+      const success = await authService.signUp(apiFormData);
       console.log('[SignUp] Signup response:', success);
       if (success) {
         navigate('/');

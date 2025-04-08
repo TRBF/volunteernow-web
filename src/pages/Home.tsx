@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import Feed from '../components/Feed';
-import NotificationsPanel from '../components/NotificationsPanel';
+import CalloutPanel from '../components/CalloutPanel';
 import Header from '../components/Header';
 
 const Home = () => {
@@ -62,7 +62,7 @@ const Home = () => {
                 display: { xs: 'none', md: 'block' }, // Hide on mobile
               }}
             >
-              <NotificationsPanel />
+              <CalloutPanel />
             </Box>
           </Container>
         </Box>

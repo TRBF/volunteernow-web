@@ -133,6 +133,11 @@ const Login = () => {
               <Link component={RouterLink} to="/register" variant="body2">
                 {"Don't have an account? Sign Up"}
               </Link>
+              <Box sx={{ mt: 1 }}>
+                <Link component={RouterLink} to="/forgot-password" variant="body2">
+                  {"Forgot password?"}
+                </Link>
+              </Box>
             </Box>
           </Box>
         </Paper>

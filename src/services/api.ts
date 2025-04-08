@@ -48,7 +48,7 @@ export const opportunityService = {
         image_url: getMediaUrl(opportunity.post_image), // Handle media URL
         location: opportunity.location || '',
         date: opportunity.time || '', // API returns 'time' instead of 'date'
-        organization: opportunity.organization || '',
+        organization: opportunity.organization || 'VolunteerNow',
       likes: opportunity.like_count || 0, // API returns 'like_count' instead of 'likes'
         comments: opportunity.comments || [],
       }));
@@ -65,7 +65,7 @@ export const opportunityService = {
         image_url: getMediaUrl(data.post_image),
         location: data.location || '',
         date: data.time || '',
-        organization: data.organization || '',
+        organization: data.organization || 'VolunteerNow',
         requirements: Array.isArray(data.requirements) ? data.requirements : [],
         participants: Array.isArray(data.participants) ? data.participants.map((p: any) => ({
           id: p.id || '',
@@ -364,7 +364,7 @@ export const calloutsService = {
       id: callout.id,
       title: callout.title,
       description: callout.description,
-      organization: callout.sender?.user?.username || 'Unknown',
+      organization: callout.sender?.user?.username || 'VolunteerNow',
       organizationLogo: callout.sender?.profile_picture ? getMediaUrl(callout.sender.profile_picture) : undefined,
       calloutPicture: callout.callout_picture ? getMediaUrl(callout.callout_picture) : undefined,
       opportunity: callout.opportunity ? {
@@ -381,7 +381,7 @@ export const calloutsService = {
       id: callout.id,
       title: callout.title,
       description: callout.description,
-      organization: callout.sender?.user?.username || 'Unknown',
+      organization: callout.sender?.user?.username || 'VolunteerNow',
       organizationLogo: callout.sender?.profile_picture ? getMediaUrl(callout.sender.profile_picture) : undefined,
       calloutPicture: callout.callout_picture ? getMediaUrl(callout.callout_picture) : undefined,
       opportunity: callout.opportunity ? {
@@ -493,7 +493,7 @@ export const searchService = {
           return {
             id: result.id,
             title: result.name,
-            organization: result.organization || '',
+            organization: result.organization || 'VolunteerNow',
             image_url: result.post_image ? `${MEDIA_BASE_URL}${result.post_image}` : '',
             type: 'opportunity'
           };
