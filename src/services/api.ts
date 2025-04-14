@@ -93,13 +93,13 @@ export const opportunityService = {
 // Auth Service
 export const authService = {
   // Expected response: { token: string, user: { id: number, username: string } }
-  login: async (credentials: { identifier: string; password: string }) => {
+  login: async (credentials: { username: string; password: string }) => {
     try {
       // First get CSRF token
       await api.get('/csrf/');
       
       const formData = new FormData();
-      formData.append('identifier', credentials.identifier);
+      formData.append('username', credentials.username);
       formData.append('password', credentials.password);
       
       const response = await api.post('/get_token/', formData, {
@@ -121,15 +121,14 @@ export const authService = {
         });
         
         const userId = idResponse.data.id;
-        const username = idResponse.data.username || credentials.identifier;
         localStorage.setItem('user_id', userId.toString());
-        localStorage.setItem('username', username);
+        localStorage.setItem('username', credentials.username);
 
         return {
           token: token,
           user: {
             id: userId,
-            username: username
+            username: credentials.username
           }
         };
       }

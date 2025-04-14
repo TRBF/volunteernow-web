@@ -16,7 +16,7 @@ import { authService } from '../services/api';
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    identifier: '', // This will hold either username or email
+    username: '',
     password: '',
   });
   const [error, setError] = useState<string | null>(null);
@@ -38,8 +38,8 @@ const Login = () => {
 
     try {
       // Validate form data
-      if (!formData.identifier.trim()) {
-        setError('Username or email is required');
+      if (!formData.username.trim()) {
+        setError('Username is required');
         setIsLoading(false);
         return;
       }
@@ -49,17 +49,17 @@ const Login = () => {
         return;
       }
 
-      console.log('[Login] Attempting login for user:', formData.identifier);
+      console.log('[Login] Attempting login for user:', formData.username);
       await authService.login({
-        identifier: formData.identifier,
+        username: formData.username,
         password: formData.password
       });
 
-      console.log('[Login] Login successful for user:', formData.identifier);
+      console.log('[Login] Login successful for user:', formData.username);
       navigate('/');
     } catch (err: any) {
       console.error('[Login] Login error:', err);
-      setError(err.response?.data?.message || 'Invalid username/email or password');
+      setError(err.response?.data?.detail || 'Invalid username or password');
     } finally {
       setIsLoading(false);
     }
@@ -93,12 +93,12 @@ const Login = () => {
               margin="normal"
               required
               fullWidth
-              id="identifier"
-              label="Username or Email"
-              name="identifier"
-              autoComplete="username email"
+              id="username"
+              label="Username"
+              name="username"
+              autoComplete="username"
               autoFocus
-              value={formData.identifier}
+              value={formData.username}
               onChange={handleChange}
               error={!!error}
               disabled={isLoading}
