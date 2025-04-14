@@ -93,46 +93,54 @@ export const opportunityService = {
 // Auth Service
 export const authService = {
   // Expected response: { token: string, user: { id: number, username: string } }
-  login: async (credentials: { username: string; password: string }) => {
-    // First get CSRF token
-    await api.get('/csrf/');
-    
-    const formData = new FormData();
-    formData.append('username', credentials.username);
-    formData.append('password', credentials.password);
-    
-    const response = await api.post('/get_token/', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-
-    if (response.data.token) {
-      // Store the token
-      const token = response.data.token;
-      localStorage.setItem('token', token);
+  login: async (credentials: { identifier: string; password: string }) => {
+    try {
+      // First get CSRF token
+      await api.get('/csrf/');
       
-      // Get user ID
-      const idResponse = await api.get('/get_id/', {
+      const formData = new FormData();
+      formData.append('identifier', credentials.identifier);
+      formData.append('password', credentials.password);
+      
+      const response = await api.post('/get_token/', formData, {
         headers: {
-          'Authorization': `Token ${token}`
-        }
+          'Content-Type': 'multipart/form-data',
+        },
       });
-      
-      const userId = idResponse.data.id;
-      localStorage.setItem('user_id', userId.toString());
-      localStorage.setItem('username', credentials.username);
 
-      return {
-        token: token,
-        user: {
-          id: userId,
-          username: credentials.username
-        }
-      };
+      if (response.data.token) {
+        // Store the token
+        const token = response.data.token;
+        localStorage.setItem('token', token);
+        
+        // Get user ID
+        const idResponse = await api.get('/get_id/', {
+          headers: {
+            'Authorization': `Token ${token}`
+          }
+        });
+        
+        const userId = idResponse.data.id;
+        const username = idResponse.data.username || credentials.identifier;
+        localStorage.setItem('user_id', userId.toString());
+        localStorage.setItem('username', username);
+
+        return {
+          token: token,
+          user: {
+            id: userId,
+            username: username
+          }
+        };
+      }
+      
+      throw new Error('Login failed');
+    } catch (error: any) {
+      if (error.response) {
+        throw error;
+      }
+      throw new Error('Login failed. Please try again.');
     }
-    
-    throw new Error('Login failed');
   },
 
   // Expected response: { token: string, user: { id: number, username: string, email: string } }

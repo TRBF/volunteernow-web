@@ -16,7 +16,7 @@ import { authService } from '../services/api';
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    username: '',
+    identifier: '', // This will hold either username or email
     password: '',
   });
   const [error, setError] = useState<string | null>(null);
@@ -34,30 +34,32 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
     try {
       // Validate form data
-      if (!formData.username.trim()) {
-        console.error('[Login] Validation failed: Username is required');
+      if (!formData.identifier.trim()) {
+        setError('Username or email is required');
         setIsLoading(false);
         return;
       }
       if (!formData.password.trim()) {
-        console.error('[Login] Validation failed: Password is required');
+        setError('Password is required');
         setIsLoading(false);
         return;
       }
 
-      console.log('[Login] Attempting login for user:', formData.username);
-      const response = await authService.login({
-        username: formData.username,
+      console.log('[Login] Attempting login for user:', formData.identifier);
+      await authService.login({
+        identifier: formData.identifier,
         password: formData.password
       });
 
-      console.log('[Login] Login successful for user:', formData.username);
+      console.log('[Login] Login successful for user:', formData.identifier);
       navigate('/');
-    } catch (err) {
+    } catch (err: any) {
       console.error('[Login] Login error:', err);
+      setError(err.response?.data?.message || 'Invalid username/email or password');
     } finally {
       setIsLoading(false);
     }
@@ -91,14 +93,14 @@ const Login = () => {
               margin="normal"
               required
               fullWidth
-              id="username"
-              label="Username"
-              name="username"
-              autoComplete="username"
+              id="identifier"
+              label="Username or Email"
+              name="identifier"
+              autoComplete="username email"
               autoFocus
-              value={formData.username}
+              value={formData.identifier}
               onChange={handleChange}
-              error={!!error && !formData.username.trim()}
+              error={!!error}
               disabled={isLoading}
             />
             <TextField
@@ -112,7 +114,7 @@ const Login = () => {
               autoComplete="current-password"
               value={formData.password}
               onChange={handleChange}
-              error={!!error && !formData.password.trim()}
+              error={!!error}
               disabled={isLoading}
             />
             {error && (
