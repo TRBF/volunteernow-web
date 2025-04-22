@@ -21,7 +21,6 @@ import {
   Toolbar,
   Drawer,
   Tooltip,
-  useMediaQuery,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -90,8 +89,6 @@ const Header: React.FC<HeaderProps> = ({
   const [peopleResults, setPeopleResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
-
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleLogout = async () => {
     try {
@@ -164,13 +161,6 @@ const Header: React.FC<HeaderProps> = ({
   const sidebarWidth = {
     xs: '100%',
     sm: 280,
-    md: 280,
-  };
-
-  const isCollapsedWidth = {
-    xs: '100%',
-    sm: 72,
-    md: 72,
   };
 
   const isActive = (path: string) => {
@@ -197,416 +187,310 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      {!isMobile ? (
-        // Desktop sidebar
-        <>
-          {!searchDrawerOpen ? (
-            <Box
-              sx={{
-                width: isCollapsed ? isCollapsedWidth : sidebarWidth,
-                height: '100vh',
-                position: 'fixed',
-                left: 0,
-                top: 0,
-                backgroundColor: 'white',
-                borderRight: '1px solid',
-                borderColor: 'divider',
-                display: 'flex',
-                flexDirection: 'column',
-                p: isCollapsed ? 1.5 : 3,
-                transition: theme.transitions.create(['width', 'padding'], {
-                  easing: theme.transitions.easing.sharp,
-                  duration: theme.transitions.duration.enteringScreen,
-                }),
-                zIndex: 1200,
-              }}
-            >
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'space-between', 
-                mb: 4,
-                pl: isCollapsed ? 0.5 : 0
-              }}>
-                {!isCollapsed && (
-                  <Button
-                    color="inherit"
-                    onClick={() => navigate('/')}
-                    sx={{
-                      textTransform: 'none',
-                      fontSize: { xs: '1.2rem', sm: '1.5rem' },
-                      fontWeight: 'bold',
-                      color: theme.palette.primary.main,
-                      '&:hover': {
-                        backgroundColor: 'transparent',
-                      },
-                    }}
-                  >
-                    VolunteerNow
-                  </Button>
-                )}
-                <IconButton 
-                  onClick={() => setIsCollapsed(!isCollapsed)}
-                  sx={{ 
-                    color: 'text.secondary',
-                    '&:hover': {
-                      backgroundColor: 'transparent',
-                    },
-                  }}
-                >
-                  {isCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-                </IconButton>
-              </Box>
-
-              <List sx={{ 
-                flex: 1, 
-                px: isCollapsed ? 0 : 1,
-                '& .MuiListItemButton-root': {
-                  borderRadius: 2,
-                  mb: 0.5,
-                  minHeight: 48,
-                  '&:hover': {
-                    backgroundColor: 'action.hover',
-                  },
-                }
-              }}>
-                {showSearch && (
-                  <ListItem disablePadding sx={{ mb: 1 }}>
-                    <ListItemButton 
-                      onClick={handleSearchOpen}
-                      sx={{
-                        borderRadius: 2,
-                      }}
-                    >
-                      <ListItemIcon>
-                        <SearchIcon />
-                      </ListItemIcon>
-                      {!isCollapsed && (
-                        <ListItemText 
-                          primary="Search" 
-                          primaryTypographyProps={{
-                            fontSize: '0.9rem',
-                            color: 'text.secondary',
-                          }}
-                        />
-                      )}
-                    </ListItemButton>
-                  </ListItem>
-                )}
-
-                {menuItems.map((item) => (
-                  <ListItem key={item.path} disablePadding>
-                    <ListItemButton
-                      onClick={item.onClick}
-                      selected={isActive(item.path)}
-                      sx={{
-                        '&.Mui-selected': {
-                          backgroundColor: 'primary.main',
-                          color: 'primary.contrastText',
-                          '&:hover': {
-                            backgroundColor: 'primary.dark',
-                          },
-                          '& .MuiListItemIcon-root': {
-                            color: 'inherit',
-                          },
-                        },
-                      }}
-                    >
-                      <ListItemIcon sx={{ minWidth: 40 }}>
-                        <item.icon />
-                      </ListItemIcon>
-                      {!isCollapsed && (
-                        <ListItemText 
-                          primary={item.label} 
-                          primaryTypographyProps={{
-                            fontSize: '0.9rem',
-                          }}
-                        />
-                      )}
-                    </ListItemButton>
-                  </ListItem>
-                ))}
-
-                <ListItem disablePadding sx={{ mt: 'auto' }}>
-                  <ListItemButton
-                    onClick={handleLogout}
-                    sx={{
-                      '&:hover': {
-                        backgroundColor: 'error.light',
-                        color: 'error.contrastText',
-                      },
-                    }}
-                  >
-                    <ListItemIcon sx={{ minWidth: 40 }}>
-                      <LogoutIcon />
-                    </ListItemIcon>
-                    {!isCollapsed && (
-                      <ListItemText 
-                        primary="Logout" 
-                        primaryTypographyProps={{
-                          fontSize: '0.9rem',
-                        }}
-                      />
-                    )}
-                  </ListItemButton>
-                </ListItem>
-              </List>
-            </Box>
-          ) : (
-            <Drawer
-              anchor="left"
-              open={searchDrawerOpen}
-              onClose={handleSearchClose}
-              sx={{
-                '& .MuiDrawer-paper': {
-                  width: { xs: '100%', sm: 400 },
-                  boxSizing: 'border-box',
-                },
-              }}
-            >
-              <Box sx={{ p: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <IconButton onClick={handleSearchClose} sx={{ mr: 1 }}>
-                    <ArrowBackIcon />
-                  </IconButton>
-                  <TextField
-                    fullWidth
-                    placeholder="Search..."
-                    value={localSearchQuery}
-                    onChange={handleSearchChange}
-                    InputProps={{
-                      startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
-                    }}
-                  />
-                </Box>
-
-                <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 2 }}>
-                  <Tab label="Opportunities" />
-                  <Tab label="People" />
-                </Tabs>
-
-                {isSearching ? (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-                    <CircularProgress />
-                  </Box>
-                ) : searchError ? (
-                  <Typography color="error" sx={{ p: 2 }}>
-                    {searchError}
-                  </Typography>
-                ) : (
-                  <>
-                    <TabPanel value={tabValue} index={0}>
-                      {opportunityResults.length > 0 ? (
-                        <List>
-                          {opportunityResults.map((result) => (
-                            <ListItem key={result.id} disablePadding>
-                              <ListItemButton
-                                onClick={() => {
-                                  navigate(`/opportunity/${result.id}`);
-                                  handleSearchClose();
-                                }}
-                              >
-                                <ListItemAvatar>
-                                  <Avatar src={result.image_url} alt={result.title} />
-                                </ListItemAvatar>
-                                <ListItemText
-                                  primary={result.title}
-                                  secondary={result.organization}
-                                />
-                              </ListItemButton>
-                            </ListItem>
-                          ))}
-                        </List>
-                      ) : (
-                        <Typography color="text.secondary" sx={{ p: 2 }}>
-                          No opportunities found
-                        </Typography>
-                      )}
-                    </TabPanel>
-                    <TabPanel value={tabValue} index={1}>
-                      {peopleResults.length > 0 ? (
-                        <List>
-                          {peopleResults.map((result) => (
-                            <ListItem key={result.id} disablePadding>
-                              <ListItemButton
-                                onClick={() => {
-                                  navigate(`/profile/${result.id}`);
-                                  handleSearchClose();
-                                }}
-                              >
-                                <ListItemAvatar>
-                                  <Avatar src={result.profile_picture} alt={result.username} />
-                                </ListItemAvatar>
-                                <ListItemText
-                                  primary={`${result.first_name} ${result.last_name}`}
-                                  secondary={result.username}
-                                />
-                              </ListItemButton>
-                            </ListItem>
-                          ))}
-                        </List>
-                      ) : (
-                        <Typography color="text.secondary" sx={{ p: 2 }}>
-                          No people found
-                        </Typography>
-                      )}
-                    </TabPanel>
-                  </>
-                )}
-              </Box>
-            </Drawer>
-          )}
-        </>
-      ) : (
-        // Mobile bottom navigation
-        <>
-          <AppBar 
-            position="fixed" 
-            color="inherit" 
-            elevation={0}
-            sx={{ 
-              top: 'auto', 
-              bottom: 0,
-              borderTop: '1px solid',
-              borderColor: 'divider',
-              backgroundColor: 'white',
-            }}
-          >
-            <Toolbar sx={{ justifyContent: 'space-around', minHeight: 56 }}>
-              {menuItems.map((item) => (
-                <IconButton
-                  key={item.path}
-                  onClick={item.onClick}
-                  color={isActive(item.path) ? 'primary' : 'default'}
-                  sx={{
-                    '&:hover': {
-                      backgroundColor: 'transparent',
-                    },
-                  }}
-                >
-                  <item.icon />
-                </IconButton>
-              ))}
-              <IconButton
-                onClick={handleLogout}
-                color="default"
+      {!searchDrawerOpen ? (
+        <Box
+          sx={{
+            width: {
+              xs: isCollapsed ? 0 : '100%',
+              sm: isCollapsed ? 72 : sidebarWidth.sm,
+            },
+            height: '100vh',
+            position: {
+              xs: 'fixed',
+              sm: 'fixed',
+            },
+            left: 0,
+            top: 0,
+            backgroundColor: 'white',
+            borderRight: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            flexDirection: 'column',
+            p: {
+              xs: isCollapsed ? 1 : 2,
+              sm: isCollapsed ? 1.5 : 3,
+            },
+            transition: theme.transitions.create(['width', 'padding'], {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
+            zIndex: 1200,
+          }}
+        >
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between', 
+            mb: { xs: 2, sm: 4 },
+            pl: { xs: 0, sm: isCollapsed ? 0.5 : 0 }
+          }}>
+            {!isCollapsed && (
+              <Button
+                color="inherit"
+                onClick={() => navigate('/')}
                 sx={{
+                  textTransform: 'none',
+                  fontSize: { xs: '1.25rem', sm: '1.5rem' },
+                  fontWeight: 'bold',
+                  color: theme.palette.primary.main,
                   '&:hover': {
                     backgroundColor: 'transparent',
-                    color: 'error.main',
                   },
                 }}
               >
-                <LogoutIcon />
-              </IconButton>
-            </Toolbar>
-          </AppBar>
-          {showSearch && (
-            <Drawer
-              anchor="bottom"
-              open={searchDrawerOpen}
-              onClose={handleSearchClose}
-              sx={{
-                '& .MuiDrawer-paper': {
-                  height: '80vh',
-                  borderTopLeftRadius: 16,
-                  borderTopRightRadius: 16,
+                VolunteerNow
+              </Button>
+            )}
+            <IconButton 
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              sx={{ 
+                color: 'text.secondary',
+                '&:hover': {
+                  backgroundColor: 'transparent',
                 },
               }}
             >
-              <Box sx={{ p: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <IconButton onClick={handleSearchClose} sx={{ mr: 1 }}>
-                    <ArrowBackIcon />
-                  </IconButton>
-                  <TextField
-                    fullWidth
-                    placeholder="Search..."
-                    value={localSearchQuery}
-                    onChange={handleSearchChange}
-                    InputProps={{
-                      startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+              {isCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+            </IconButton>
+          </Box>
+
+          <List sx={{ 
+            flex: 1, 
+            px: { 
+              xs: isCollapsed ? 0 : 0.5,
+              sm: isCollapsed ? 0 : 1 
+            }
+          }}>
+            {showSearch && (
+              <ListItem disablePadding sx={{ mb: 1 }}>
+                <ListItemButton 
+                  onClick={handleSearchOpen}
+                  sx={{
+                    borderRadius: 2,
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                    },
+                  }}
+                >
+                  <ListItemIcon>
+                    <SearchIcon />
+                  </ListItemIcon>
+                  {!isCollapsed && (
+                    <ListItemText 
+                      primary="Search" 
+                      primaryTypographyProps={{
+                        sx: {
+                          fontSize: { xs: '0.875rem', sm: '1rem' },
+                        }
+                      }}
+                    />
+                  )}
+                </ListItemButton>
+              </ListItem>
+            )}
+
+            {menuItems.map((item) => (
+              <ListItem key={item.path} disablePadding sx={{ mb: 1 }}>
+                <ListItemButton
+                  onClick={item.onClick}
+                  selected={isActive(item.path)}
+                  sx={{
+                    borderRadius: 2,
+                    '&.Mui-selected': {
+                      backgroundColor: 'rgba(114, 17, 162, 0.08)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(114, 17, 162, 0.12)',
+                      },
+                    },
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                    },
+                  }}
+                >
+                  <ListItemIcon>
+                    <item.icon />
+                  </ListItemIcon>
+                  {!isCollapsed && (
+                    <ListItemText 
+                      primary={item.label} 
+                      primaryTypographyProps={{
+                        sx: {
+                          fontSize: { xs: '0.875rem', sm: '1rem' },
+                        }
+                      }}
+                    />
+                  )}
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+
+          <Box sx={{ mt: 'auto' }}>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={handleLogout}
+                sx={{
+                  borderRadius: 2,
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                  },
+                }}
+              >
+                <ListItemIcon>
+                  <LogoutIcon />
+                </ListItemIcon>
+                {!isCollapsed && (
+                  <ListItemText 
+                    primary="Logout" 
+                    primaryTypographyProps={{
+                      sx: {
+                        fontSize: { xs: '0.875rem', sm: '1rem' },
+                      }
                     }}
                   />
-                </Box>
-
-                <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 2 }}>
-                  <Tab label="Opportunities" />
-                  <Tab label="People" />
-                </Tabs>
-
-                {isSearching ? (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-                    <CircularProgress />
-                  </Box>
-                ) : searchError ? (
-                  <Typography color="error" sx={{ p: 2 }}>
-                    {searchError}
-                  </Typography>
-                ) : (
-                  <>
-                    <TabPanel value={tabValue} index={0}>
-                      {opportunityResults.length > 0 ? (
-                        <List>
-                          {opportunityResults.map((result) => (
-                            <ListItem key={result.id} disablePadding>
-                              <ListItemButton
-                                onClick={() => {
-                                  navigate(`/opportunity/${result.id}`);
-                                  handleSearchClose();
-                                }}
-                              >
-                                <ListItemAvatar>
-                                  <Avatar src={result.image_url} alt={result.title} />
-                                </ListItemAvatar>
-                                <ListItemText
-                                  primary={result.title}
-                                  secondary={result.organization}
-                                />
-                              </ListItemButton>
-                            </ListItem>
-                          ))}
-                        </List>
-                      ) : (
-                        <Typography color="text.secondary" sx={{ p: 2 }}>
-                          No opportunities found
-                        </Typography>
-                      )}
-                    </TabPanel>
-                    <TabPanel value={tabValue} index={1}>
-                      {peopleResults.length > 0 ? (
-                        <List>
-                          {peopleResults.map((result) => (
-                            <ListItem key={result.id} disablePadding>
-                              <ListItemButton
-                                onClick={() => {
-                                  navigate(`/profile/${result.id}`);
-                                  handleSearchClose();
-                                }}
-                              >
-                                <ListItemAvatar>
-                                  <Avatar src={result.profile_picture} alt={result.username} />
-                                </ListItemAvatar>
-                                <ListItemText
-                                  primary={`${result.first_name} ${result.last_name}`}
-                                  secondary={result.username}
-                                />
-                              </ListItemButton>
-                            </ListItem>
-                          ))}
-                        </List>
-                      ) : (
-                        <Typography color="text.secondary" sx={{ p: 2 }}>
-                          No people found
-                        </Typography>
-                      )}
-                    </TabPanel>
-                  </>
                 )}
+              </ListItemButton>
+            </ListItem>
+          </Box>
+        </Box>
+      ) : (
+        <Drawer
+          anchor="left"
+          open={searchDrawerOpen}
+          onClose={handleSearchClose}
+          sx={{
+            '& .MuiDrawer-paper': {
+              width: { xs: '100%', sm: 400 },
+              boxSizing: 'border-box',
+            },
+          }}
+        >
+          <Box sx={{ p: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <IconButton onClick={handleSearchClose} sx={{ mr: 1 }}>
+                <ArrowBackIcon />
+              </IconButton>
+              <TextField
+                fullWidth
+                placeholder="Search..."
+                value={localSearchQuery}
+                onChange={handleSearchChange}
+                InputProps={{
+                  startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                  },
+                }}
+              />
+            </Box>
+
+            <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 2 }}>
+              <Tab label="Opportunities" />
+              <Tab label="People" />
+            </Tabs>
+
+            {isSearching ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                <CircularProgress />
               </Box>
-            </Drawer>
-          )}
-        </>
+            ) : searchError ? (
+              <Typography color="error" sx={{ p: 2 }}>
+                {searchError}
+              </Typography>
+            ) : (
+              <>
+                <TabPanel value={tabValue} index={0}>
+                  {opportunityResults.length > 0 ? (
+                    <List>
+                      {opportunityResults.map((result) => (
+                        <ListItem key={result.id} disablePadding sx={{ mb: 1 }}>
+                          <ListItemButton
+                            onClick={() => {
+                              navigate(`/opportunity/${result.id}`);
+                              handleSearchClose();
+                            }}
+                            sx={{
+                              borderRadius: 2,
+                              '&:hover': {
+                                backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                              },
+                            }}
+                          >
+                            <ListItemText
+                              primary={result.name}
+                              secondary={result.description}
+                              primaryTypographyProps={{
+                                sx: {
+                                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                                }
+                              }}
+                              secondaryTypographyProps={{
+                                sx: {
+                                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                                }
+                              }}
+                            />
+                          </ListItemButton>
+                        </ListItem>
+                      ))}
+                    </List>
+                  ) : (
+                    <Typography color="text.secondary" sx={{ p: 2 }}>
+                      No opportunities found
+                    </Typography>
+                  )}
+                </TabPanel>
+
+                <TabPanel value={tabValue} index={1}>
+                  {peopleResults.length > 0 ? (
+                    <List>
+                      {peopleResults.map((result) => (
+                        <ListItem key={result.id} disablePadding sx={{ mb: 1 }}>
+                          <ListItemButton
+                            onClick={() => {
+                              navigate(`/profile/${result.id}`);
+                              handleSearchClose();
+                            }}
+                            sx={{
+                              borderRadius: 2,
+                              '&:hover': {
+                                backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                              },
+                            }}
+                          >
+                            <ListItemAvatar>
+                              <Avatar src={result.profile_picture} />
+                            </ListItemAvatar>
+                            <ListItemText
+                              primary={result.username}
+                              secondary={result.name}
+                              primaryTypographyProps={{
+                                sx: {
+                                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                                }
+                              }}
+                              secondaryTypographyProps={{
+                                sx: {
+                                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                                }
+                              }}
+                            />
+                          </ListItemButton>
+                        </ListItem>
+                      ))}
+                    </List>
+                  ) : (
+                    <Typography color="text.secondary" sx={{ p: 2 }}>
+                      No people found
+                    </Typography>
+                  )}
+                </TabPanel>
+              </>
+            )}
+          </Box>
+        </Drawer>
       )}
     </>
   );

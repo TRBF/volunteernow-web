@@ -1,7 +1,6 @@
 import React, { Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { ThemeProvider, useTheme } from '@mui/material/styles';
-import { useMediaQuery } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { theme } from './theme';
 import { authService } from './services/api';
@@ -35,8 +34,6 @@ interface MainContentProps {
 
 const MainContent: React.FC<MainContentProps> = ({ children }) => {
   const location = useLocation();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
   return (
     <Box
@@ -49,17 +46,12 @@ const MainContent: React.FC<MainContentProps> = ({ children }) => {
           duration: theme.transitions.duration.enteringScreen,
         }),
         p: { xs: 2, sm: 3 },
-        ml: { xs: 0, sm: '72px', md: '280px' },
-        width: { xs: '100%', sm: `calc(100% - 72px)`, md: `calc(100% - 280px)` },
-        pb: { xs: '56px', sm: 0 },
+        ml: { xs: 0, sm: '72px' },
+        width: { xs: '100%', sm: `calc(100% - 72px)` },
       }}
     >
       <Fade in={true} timeout={300} key={location.pathname}>
-        <Box sx={{ 
-          maxWidth: { xs: '100%', sm: '800px', md: '1200px' }, 
-          mx: 'auto',
-          pt: { xs: 2, sm: 0 },
-        }}>
+        <Box>
           {children}
         </Box>
       </Fade>
