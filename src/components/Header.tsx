@@ -267,18 +267,27 @@ const Header: React.FC<HeaderProps> = ({
                   onClick={handleSearchOpen}
                   sx={{
                     borderRadius: 2,
+                    minHeight: 48,
+                    px: isCollapsed ? 2 : 3,
                     '&:hover': {
-                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                      backgroundColor: 'transparent',
                     },
                   }}
                 >
-                  <ListItemIcon>
-                    <SearchIcon />
+                  <ListItemIcon sx={{ minWidth: 0, mr: isCollapsed ? 0 : 3 }}>
+                    <SearchIcon 
+                      sx={{ 
+                        color: searchDrawerOpen ? theme.palette.primary.main : 'text.secondary',
+                        fontSize: 28,
+                      }} 
+                    />
                   </ListItemIcon>
                   {!isCollapsed && (
                     <ListItemText 
-                      primary="Search" 
+                      primary="Search"
                       primaryTypographyProps={{
+                        color: searchDrawerOpen ? 'primary' : 'text.primary',
+                        fontWeight: searchDrawerOpen ? 600 : 400,
                         sx: {
                           fontSize: { xs: '0.875rem', sm: '1rem' },
                         }
@@ -291,29 +300,31 @@ const Header: React.FC<HeaderProps> = ({
 
             {menuItems.map((item) => (
               <ListItem key={item.path} disablePadding sx={{ mb: 1 }}>
-                <ListItemButton
+                <ListItemButton 
                   onClick={item.onClick}
-                  selected={isActive(item.path)}
                   sx={{
                     borderRadius: 2,
-                    '&.Mui-selected': {
-                      backgroundColor: 'rgba(114, 17, 162, 0.08)',
-                      '&:hover': {
-                        backgroundColor: 'rgba(114, 17, 162, 0.12)',
-                      },
-                    },
+                    minHeight: 48,
+                    px: isCollapsed ? 2 : 3,
                     '&:hover': {
-                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                      backgroundColor: 'transparent',
                     },
                   }}
                 >
-                  <ListItemIcon>
-                    <item.icon />
+                  <ListItemIcon sx={{ minWidth: 0, mr: isCollapsed ? 0 : 3 }}>
+                    <item.icon
+                      sx={{ 
+                        color: isActive(item.path) ? theme.palette.primary.main : 'text.secondary',
+                        fontSize: 28,
+                      }} 
+                    />
                   </ListItemIcon>
                   {!isCollapsed && (
                     <ListItemText 
-                      primary={item.label} 
+                      primary={item.label}
                       primaryTypographyProps={{
+                        color: isActive(item.path) ? 'primary' : 'text.primary',
+                        fontWeight: isActive(item.path) ? 600 : 400,
                         sx: {
                           fontSize: { xs: '0.875rem', sm: '1rem' },
                         }
@@ -331,18 +342,21 @@ const Header: React.FC<HeaderProps> = ({
                 onClick={handleLogout}
                 sx={{
                   borderRadius: 2,
+                  minHeight: 48,
+                  px: isCollapsed ? 2 : 3,
                   '&:hover': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                    backgroundColor: 'transparent',
                   },
                 }}
               >
-                <ListItemIcon>
-                  <LogoutIcon />
+                <ListItemIcon sx={{ minWidth: 0, mr: isCollapsed ? 0 : 3 }}>
+                  <LogoutIcon sx={{ color: 'text.secondary', fontSize: 28 }} />
                 </ListItemIcon>
                 {!isCollapsed && (
                   <ListItemText 
                     primary="Logout" 
                     primaryTypographyProps={{
+                      color: 'text.primary',
                       sx: {
                         fontSize: { xs: '0.875rem', sm: '1rem' },
                       }
