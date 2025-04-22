@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/volunteernow-web",
+      "destination": "/"
+    },
+    {
       "source": "/volunteernow-web/(.*)",
       "destination": "/$1"
     },
