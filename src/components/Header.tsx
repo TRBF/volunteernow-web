@@ -21,6 +21,7 @@ import {
   Toolbar,
   Drawer,
   Tooltip,
+  useMediaQuery,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -81,6 +82,7 @@ const Header: React.FC<HeaderProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchDrawerOpen, setSearchDrawerOpen] = useState(false);
@@ -184,6 +186,8 @@ const Header: React.FC<HeaderProps> = ({
     { path: '/applications', icon: ApplicationIcon, label: 'Applications', onClick: () => navigate('/applications') },
     { path: '/profile', icon: PersonIcon, label: 'Profile', onClick: handleProfileClick },
   ];
+
+  if (isMobile) return null;
 
   return (
     <>

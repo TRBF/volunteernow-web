@@ -8,6 +8,7 @@ import BackgroundPattern from './components/BackgroundPattern';
 import { CircularProgress, Box, Fade } from '@mui/material';
 import PrivateRoute from './components/PrivateRoute';
 import Header from './components/Header';
+import BottomNav from './components/BottomNavigation';
 
 // Lazy load components
 const Login = React.lazy(() => import('./pages/Login'));
@@ -46,8 +47,9 @@ const MainContent: React.FC<MainContentProps> = ({ children }) => {
           duration: theme.transitions.duration.enteringScreen,
         }),
         p: { xs: 2, sm: 3 },
-        ml: { xs: 0, sm: '72px' },
-        width: { xs: '100%', sm: `calc(100% - 72px)` },
+        ml: { xs: 0, sm: '72px', md: '240px' },
+        width: { xs: '100%', sm: `calc(100% - 72px)`, md: `calc(100% - 240px)` },
+        pb: { xs: '72px', sm: 3 }, // Add padding bottom for mobile to account for bottom nav
       }}
     >
       <Fade in={true} timeout={300} key={location.pathname}>
@@ -74,6 +76,7 @@ const PrivateLayout = () => {
           <Route path="/archive" element={<Archive />} />
         </Routes>
       </MainContent>
+      <BottomNav />
     </Box>
   );
 };
