@@ -45,11 +45,13 @@ const MainContent: React.FC<MainContentProps> = ({ children }) => {
           easing: theme.transitions.easing.sharp,
           duration: theme.transitions.duration.enteringScreen,
         }),
-        p: 3,
+        p: { xs: 2, sm: 3 },
+        ml: { xs: 0, sm: '72px', md: '280px' },
+        width: { xs: '100%', sm: `calc(100% - 72px)`, md: `calc(100% - 280px)` },
       }}
     >
       <Fade in={true} timeout={300} key={location.pathname}>
-        <Box>
+        <Box sx={{ maxWidth: { xs: '100%', sm: '800px', md: '1200px' }, mx: 'auto' }}>
           {children}
         </Box>
       </Fade>
