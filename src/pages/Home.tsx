@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Container,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import Feed from '../components/Feed';
@@ -12,6 +14,9 @@ import Header from '../components/Header';
 const Home = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleSearchChange = async (query: string) => {
     setSearchQuery(query);
@@ -29,24 +34,27 @@ const Home = () => {
           component="main" 
           sx={{ 
             flexGrow: 1, 
-            ml: '240px', // Space for sidebar
+            ml: { xs: 0, sm: '72px', md: '240px' }, // Responsive sidebar spacing
             display: 'flex',
             justifyContent: 'center',
             py: 3,
+            width: { xs: '100%', sm: `calc(100% - 72px)`, md: `calc(100% - 240px)` },
           }}
         >
           <Container 
             maxWidth={false}
             sx={{ 
               display: 'flex',
-              maxWidth: '1024px', // Instagram-like max width
-              gap: 8, // Increased from 3 to 8 for more spacing
-              px: 2,
+              flexDirection: { xs: 'column', md: 'row' },
+              maxWidth: '1024px',
+              gap: { xs: 3, md: 4 },
+              px: { xs: 1, sm: 2 },
             }}
           >
             <Box 
               sx={{ 
-                width: '630px', // Instagram feed width
+                width: { xs: '100%', md: '60%' },
+                maxWidth: { md: '630px' },
                 flexShrink: 0,
               }}
             >
@@ -54,12 +62,13 @@ const Home = () => {
             </Box>
             <Box 
               sx={{ 
-                width: '320px', // Instagram sidebar width
+                width: { xs: '100%', md: '40%' },
+                maxWidth: { md: '320px' },
                 flexShrink: 0,
-                position: 'sticky',
+                position: { xs: 'static', md: 'sticky' },
                 top: 24,
                 height: 'fit-content',
-                display: { xs: 'none', md: 'block' }, // Hide on mobile
+                display: { xs: isTablet ? 'block' : 'none', md: 'block' },
               }}
             >
               <CalloutPanel />
