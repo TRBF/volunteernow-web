@@ -8,6 +8,8 @@ import {
   Chip,
   IconButton,
   Button,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import { Business, LocationOn, CalendarToday, Favorite, FavoriteBorder } from '@mui/icons-material';
 import { opportunityService } from '../services/api';
@@ -25,6 +27,8 @@ interface Opportunity {
 
 const Feed = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -63,16 +67,23 @@ const Feed = () => {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      gap: isMobile ? 0 : 4,
+      width: '100%',
+    }}>
       {opportunities.map((opportunity) => (
-        <Paper
+        <Box
           key={opportunity.id}
-          elevation={0}
+          component={isMobile ? 'div' : Paper}
+          elevation={isMobile ? 0 : 1}
           sx={{
             width: '100%',
-            borderRadius: 1,
-            border: '1px solid',
+            borderBottom: isMobile ? '1px solid' : 'none',
             borderColor: 'divider',
+            pb: isMobile ? 2 : 0,
+            borderRadius: isMobile ? 0 : 1,
             overflow: 'hidden',
           }}
         >
@@ -82,11 +93,11 @@ const Feed = () => {
             alt={opportunity.title}
             sx={{
               width: '100%',
-              height: '400px',
+              height: { xs: '250px', sm: '300px', md: '400px' },
               objectFit: 'cover',
             }}
           />
-          <Box sx={{ p: 2 }}>
+          <Box sx={{ p: { xs: 1.5, sm: 2 } }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
               <Avatar sx={{ mr: 1 }}>{opportunity.organization[0]}</Avatar>
               <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
@@ -137,7 +148,7 @@ const Feed = () => {
               </Button>
             </Box>
           </Box>
-        </Paper>
+        </Box>
       ))}
     </Box>
   );

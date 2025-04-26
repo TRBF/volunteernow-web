@@ -10,6 +10,7 @@ import {
   CircularProgress,
   useTheme,
   Button,
+  useMediaQuery,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { calloutsService, opportunityService } from '../services/api';
@@ -40,6 +41,7 @@ const Callouts: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     loadCallouts();
@@ -107,7 +109,8 @@ const Callouts: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>      {callouts.length === 0 ? (
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      {callouts.length === 0 ? (
         <Typography variant="body1" color="text.secondary" align="center" sx={{ py: 4 }}>
           No updates available at the moment.
         </Typography>
@@ -126,7 +129,20 @@ const Callouts: React.FC = () => {
                 }
               }}
             >
-              <Box sx={{ display: 'flex' }}>
+              {isMobile && callout.calloutPicture && (
+                <Box
+                  sx={{
+                    width: '100%',
+                    height: 200,
+                    backgroundImage: `url(${callout.calloutPicture})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    borderTopLeftRadius: 8,
+                    borderTopRightRadius: 8,
+                  }}
+                />
+              )}
+              <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' } }}>
                 <Box sx={{ flex: 1 }}>
                   <CardContent>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -167,7 +183,7 @@ const Callouts: React.FC = () => {
                     )}
                   </CardContent>
                 </Box>
-                {callout.calloutPicture && (
+                {!isMobile && callout.calloutPicture && (
                   <Box
                     sx={{
                       width: 150,

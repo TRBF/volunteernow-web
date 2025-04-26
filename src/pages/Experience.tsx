@@ -16,6 +16,8 @@ import {
   CircularProgress,
   Alert,
   Paper,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import { Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon, Image as ImageIcon, CloudUpload as CloudUploadIcon } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -35,6 +37,8 @@ interface Experience {
 }
 
 const Experience: React.FC = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -192,17 +196,25 @@ const Experience: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <Container maxWidth="md" sx={{ py: { xs: 2, sm: 4 } }}>
+      <Box sx={{ 
+        mb: 4, 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        justifyContent: 'space-between', 
+        alignItems: { xs: 'flex-start', sm: 'center' },
+        gap: { xs: 2, sm: 0 }
+      }}>
         <Typography variant="h4" component="h1">
           My Experience
         </Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => {
-            setEditingExperience(null);
-            setOpen(true);
+          onClick={handleOpen}
+          sx={{ 
+            width: { xs: '100%', sm: 'auto' },
+            borderRadius: 2,
           }}
         >
           Add Experience
@@ -288,8 +300,16 @@ const Experience: React.FC = () => {
         onClose={handleClose} 
         maxWidth="sm" 
         fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            p: { xs: 1, sm: 2 },
+          }
+        }}
       >
-        <DialogTitle>{editingExperience ? 'Edit Experience' : 'Add New Experience'}</DialogTitle>
+        <DialogTitle>
+          {editingExperience ? 'Edit Experience' : 'Add New Experience'}
+        </DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 2 }}>
             <TextField
@@ -308,14 +328,20 @@ const Experience: React.FC = () => {
               margin="normal"
               required
             />
-            <Box sx={{ mt: 2, mb: 2 }}>
+            <Box sx={{ 
+              mt: 2, 
+              mb: 2,
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: { xs: 2, sm: 0 }
+            }}>
               <DatePicker
                 label="Start Date"
                 value={newExperience.startDate}
                 onChange={(date) => setNewExperience(prev => ({ ...prev, startDate: date }))}
                 slotProps={{ textField: { required: true } }}
               />
-              <Box sx={{ display: 'inline-block', ml: 2 }}>
+              <Box sx={{ display: 'inline-block', ml: { xs: 0, sm: 2 }, mt: { xs: 2, sm: 0 } }}>
                 <DatePicker
                   label="End Date"
                   value={newExperience.endDate}
@@ -341,7 +367,8 @@ const Experience: React.FC = () => {
               margin="normal"
               required
             />
-            <Box sx={{ mt: 2 }}>
+
+            <Box sx={{ mt: 3 }}>
               <input
                 accept="image/*"
                 style={{ display: 'none' }}
@@ -351,69 +378,77 @@ const Experience: React.FC = () => {
               />
               <label htmlFor="experience-image-upload">
                 <Paper
-                  component="span"
                   sx={{
-                    width: '100%',
-                    height: 200,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    p: 3,
+                    textAlign: 'center',
                     cursor: 'pointer',
                     border: '2px dashed',
-                    borderColor: 'primary.main',
-                    backgroundColor: 'background.paper',
-                    position: 'relative',
-                    overflow: 'hidden',
+                    borderColor: 'divider',
                     '&:hover': {
+                      borderColor: 'primary.main',
                       backgroundColor: 'action.hover',
                     },
                   }}
                 >
-                  {imagePreview && (
+                  {imagePreview ? (
                     <Box
                       component="img"
                       src={imagePreview}
-                      alt="Experience preview"
+                      alt="Preview"
                       sx={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
                         width: '100%',
-                        height: '100%',
+                        maxHeight: 200,
                         objectFit: 'cover',
-                        opacity: 0.7,
+                        borderRadius: 1,
                       }}
                     />
+                  ) : (
+                    <Box
+                      sx={{
+                        position: 'relative',
+                        zIndex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        backgroundColor: imagePreview ? 'rgba(255, 255, 255, 0.8)' : 'transparent',
+                        padding: 2,
+                        borderRadius: 1,
+                      }}
+                    >
+                      <CloudUploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
+                      <Typography variant="body1" color="primary">
+                        {imagePreview ? 'Change Image' : 'Upload Image'}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                        Recommended size: 800x600px
+                      </Typography>
+                    </Box>
                   )}
-                  <Box
-                    sx={{
-                      position: 'relative',
-                      zIndex: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      backgroundColor: imagePreview ? 'rgba(255, 255, 255, 0.8)' : 'transparent',
-                      padding: 2,
-                      borderRadius: 1,
-                    }}
-                  >
-                    <CloudUploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-                    <Typography variant="body1" color="primary">
-                      {imagePreview ? 'Change Image' : 'Upload Image'}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
-                      Recommended size: 800x600px
-                    </Typography>
-                  </Box>
                 </Paper>
               </label>
             </Box>
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained">
+        <DialogActions sx={{ px: { xs: 2, sm: 3 }, pb: { xs: 2, sm: 3 } }}>
+          <Button 
+            onClick={handleClose}
+            sx={{ 
+              borderRadius: 2,
+              textTransform: 'none',
+              px: 3,
+            }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSubmit} 
+            variant="contained"
+            sx={{ 
+              borderRadius: 2,
+              textTransform: 'none',
+              px: 3,
+            }}
+          >
             {editingExperience ? 'Save Changes' : 'Add Experience'}
           </Button>
         </DialogActions>

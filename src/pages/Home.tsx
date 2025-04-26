@@ -34,10 +34,10 @@ const Home = () => {
           component="main" 
           sx={{ 
             flexGrow: 1, 
-            ml: { xs: 0, sm: '72px', md: '240px' }, // Responsive sidebar spacing
+            ml: { xs: 0, sm: '72px', md: '240px' },
             display: 'flex',
             justifyContent: 'center',
-            py: 3,
+            py: { xs: 0, sm: 3 },
             width: { xs: '100%', sm: `calc(100% - 72px)`, md: `calc(100% - 240px)` },
           }}
         >
@@ -47,8 +47,9 @@ const Home = () => {
               display: 'flex',
               flexDirection: { xs: 'column', md: 'row' },
               maxWidth: '1024px',
-              gap: { xs: 3, md: 4 },
-              px: { xs: 1, sm: 2 },
+              gap: { xs: 0, md: 4 },
+              px: { xs: 0, sm: 2 },
+              width: '100%',
             }}
           >
             <Box 
