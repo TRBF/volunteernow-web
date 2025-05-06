@@ -63,8 +63,13 @@ const CalloutPanel = () => {
     }
   };
 
-  const handleDismiss = (calloutId: number) => {
-    setDismissedCallouts(prev => [...prev, calloutId]);
+  const handleDismiss = async (calloutId: number) => {
+    try {
+      await calloutsService.dismissCallout(calloutId);
+      setDismissedCallouts(prev => [...prev, calloutId]);
+    } catch (error) {
+      console.error('Error dismissing callout:', error);
+    }
   };
 
   const visibleCallouts = callouts.filter(callout => !dismissedCallouts.includes(callout.id));

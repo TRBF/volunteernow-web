@@ -399,6 +399,12 @@ export const calloutsService = {
   },
 
   // Expected response: { message: string }
+  dismissCallout: async (calloutId: number) => {
+    const response = await api.post(`/dismiss_callout/${calloutId}/`);
+    return response.data;
+  },
+
+  // Expected response: { message: string }
   respondToCallout: async (calloutId: string, responseData: { message: string }) => {
     const apiResponse = await api.post(`/respond_to_callout/${calloutId}`, responseData);
     return apiResponse.data;
