@@ -49,39 +49,46 @@ const Feed = () => {
   };
 
   const handleLike = async (opportunityId: number) => {
+    // Store the current state before optimistic update
+    const currentOpportunity = opportunities.find(o => o.id === opportunityId);
+    if (!currentOpportunity) return;
+
+    // Optimistic update
     setOpportunities(prev =>
       prev.map(opportunity =>
         opportunity.id === opportunityId
           ? {
               ...opportunity,
               liked: !opportunity.liked,
-              likes: opportunity.liked ? opportunity.likes - 1 : opportunity.likes + 1,
+              likes: opportunity.liked ? Math.max(0, opportunity.likes - 1) : opportunity.likes + 1,
             }
           : opportunity
       )
     );
+
     try {
       const res = await opportunityService.likeOpportunity(opportunityId.toString());
+      // Update with backend response
       setOpportunities(prev =>
         prev.map(opportunity =>
           opportunity.id === opportunityId
             ? {
                 ...opportunity,
                 liked: res.liked,
-                likes: res.like_count,
+                likes: parseInt(res.like_count.toString(), 10),
               }
             : opportunity
         )
       );
     } catch (error) {
-      // Revert optimistic update on error
+      // Revert to original state on error
       setOpportunities(prev =>
         prev.map(opportunity =>
           opportunity.id === opportunityId
             ? {
                 ...opportunity,
-                liked: !opportunity.liked,
-                likes: opportunity.liked ? opportunity.likes + 1 : opportunity.likes - 1,
+                liked: currentOpportunity.liked,
+                likes: currentOpportunity.likes,
               }
             : opportunity
         )
