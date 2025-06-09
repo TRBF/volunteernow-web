@@ -86,8 +86,6 @@ const Header: React.FC<HeaderProps> = ({
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchDrawerOpen, setSearchDrawerOpen] = useState(false);
-  const [tabValue, setTabValue] = useState(1);
-  const [opportunityResults, setOpportunityResults] = useState<any[]>([]);
   const [peopleResults, setPeopleResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
@@ -127,27 +125,18 @@ const Header: React.FC<HeaderProps> = ({
       setIsSearching(true);
       try {
         const results = await searchService.search(query);
-        const opportunities = results.filter((result: any) => result.type === 'opportunity');
         const people = results.filter((result: any) => result.type === 'user');
-        
-        setOpportunityResults(opportunities);
         setPeopleResults(people);
       } catch (err) {
         console.error('Search error:', err);
         setSearchError('Failed to fetch search results');
-        setOpportunityResults([]);
         setPeopleResults([]);
       } finally {
         setIsSearching(false);
       }
     } else {
-      setOpportunityResults([]);
       setPeopleResults([]);
     }
-  };
-
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
   };
 
   const handleSearchOpen = () => {
@@ -239,6 +228,10 @@ const Header: React.FC<HeaderProps> = ({
                   color: theme.palette.primary.main,
                   '&:hover': {
                     backgroundColor: 'transparent',
+                    transform: 'none',
+                  },
+                  '&:active': {
+                    transform: 'none',
                   },
                 }}
               >
@@ -390,7 +383,7 @@ const Header: React.FC<HeaderProps> = ({
               </IconButton>
               <TextField
                 fullWidth
-                placeholder="Search..."
+                placeholder="Search people..."
                 value={localSearchQuery}
                 onChange={handleSearchChange}
                 InputProps={{
@@ -404,108 +397,40 @@ const Header: React.FC<HeaderProps> = ({
               />
             </Box>
 
-            <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 2 }}>
-              <Tab label="Opportunities" />
-              <Tab label="People" />
-            </Tabs>
-
             {isSearching ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
                 <CircularProgress />
               </Box>
             ) : searchError ? (
-              <Typography color="error" sx={{ p: 2 }}>
+              <Typography color="error" sx={{ p: 2, textAlign: 'center' }}>
                 {searchError}
               </Typography>
             ) : (
-              <>
-                <TabPanel value={tabValue} index={0}>
-                  {opportunityResults.length > 0 ? (
-                    <List>
-                      {opportunityResults.map((result) => (
-                        <ListItem key={result.id} disablePadding sx={{ mb: 1 }}>
-                          <ListItemButton
-                            onClick={() => {
-                              navigate(`/opportunity/${result.id}`);
-                              handleSearchClose();
-                            }}
-                            sx={{
-                              borderRadius: 2,
-                              '&:hover': {
-                                backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                              },
-                            }}
-                          >
-                            <ListItemText
-                              primary={result.name}
-                              secondary={result.description}
-                              primaryTypographyProps={{
-                                sx: {
-                                  fontSize: { xs: '0.875rem', sm: '1rem' },
-                                }
-                              }}
-                              secondaryTypographyProps={{
-                                sx: {
-                                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                                }
-                              }}
-                            />
-                          </ListItemButton>
-                        </ListItem>
-                      ))}
-                    </List>
-                  ) : (
-                    <Typography color="text.secondary" sx={{ p: 2 }}>
-                      No opportunities found
-                    </Typography>
-                  )}
-                </TabPanel>
-
-                <TabPanel value={tabValue} index={1}>
-                  {peopleResults.length > 0 ? (
-                    <List>
-                      {peopleResults.map((result) => (
-                        <ListItem key={result.id} disablePadding sx={{ mb: 1 }}>
-                          <ListItemButton
-                            onClick={() => {
-                              navigate(`/profile/${result.id}`);
-                              handleSearchClose();
-                            }}
-                            sx={{
-                              borderRadius: 2,
-                              '&:hover': {
-                                backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                              },
-                            }}
-                          >
-                            <ListItemAvatar>
-                              <Avatar src={result.profile_picture} />
-                            </ListItemAvatar>
-                            <ListItemText
-                              primary={result.username}
-                              secondary={result.name}
-                              primaryTypographyProps={{
-                                sx: {
-                                  fontSize: { xs: '0.875rem', sm: '1rem' },
-                                }
-                              }}
-                              secondaryTypographyProps={{
-                                sx: {
-                                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                                }
-                              }}
-                            />
-                          </ListItemButton>
-                        </ListItem>
-                      ))}
-                    </List>
-                  ) : (
-                    <Typography color="text.secondary" sx={{ p: 2 }}>
-                      No people found
-                    </Typography>
-                  )}
-                </TabPanel>
-              </>
+              <List>
+                {peopleResults.map((person) => (
+                  <ListItem key={person.id} disablePadding>
+                    <ListItemButton
+                      onClick={() => {
+                        navigate(`/profile/${person.id}`);
+                        handleSearchClose();
+                      }}
+                    >
+                      <ListItemAvatar>
+                        <Avatar src={person.profile_picture} alt={person.username} />
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={person.name}
+                        secondary={`@${person.username}`}
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+                {peopleResults.length === 0 && localSearchQuery.trim() && (
+                  <Typography sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
+                    No results found
+                  </Typography>
+                )}
+              </List>
             )}
           </Box>
         </Drawer>
