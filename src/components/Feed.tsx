@@ -12,7 +12,7 @@ import {
   useMediaQuery,
 } from '@mui/material';
 import { Business, LocationOn, CalendarToday, Favorite, FavoriteBorder } from '@mui/icons-material';
-import { opportunityService } from '../services/api';
+import { opportunityService, authService } from '../services/api';
 
 interface Opportunity {
   id: number;
@@ -49,6 +49,12 @@ const Feed = () => {
   };
 
   const handleLike = async (opportunityId: number) => {
+    if (!authService.isLoggedIn()) {
+      // Redirect to login if not authenticated
+      navigate('/login');
+      return;
+    }
+
     // Store the current state before optimistic update
     const currentOpportunity = opportunities.find(o => o.id === opportunityId);
     if (!currentOpportunity) return;
@@ -80,7 +86,7 @@ const Feed = () => {
             : opportunity
         )
       );
-    } catch (error) {
+    } catch (error: any) {
       // Revert to original state on error
       setOpportunities(prev =>
         prev.map(opportunity =>
@@ -94,6 +100,10 @@ const Feed = () => {
         )
       );
       console.error('Error liking opportunity:', error);
+      if (error.response?.status === 401) {
+        // If unauthorized, redirect to login
+        navigate('/login');
+      }
     }
   };
 
