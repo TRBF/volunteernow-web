@@ -47,7 +47,7 @@ const CalloutPanel = () => {
   const fetchCallouts = async () => {
     try {
       setLoading(true);
-      const data = await calloutsService.getUserCallouts();
+      const data = await calloutsService.getCallouts();
       setCallouts(data);
     } catch (error) {
       console.error('Error fetching callouts:', error);
