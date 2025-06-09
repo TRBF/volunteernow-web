@@ -13,6 +13,7 @@ import BottomNav from './components/BottomNavigation';
 // Lazy load components
 const Login = React.lazy(() => import('./pages/Login'));
 const SignUp = React.lazy(() => import('./pages/SignUp'));
+const SignUpOptions = React.lazy(() => import('./components/SignUpOptions'));
 const Home = React.lazy(() => import('./pages/Home'));
 const ForgotPassword = React.lazy(() => import('./pages/ForgotPassword'));
 const ResetPasswordConfirm = React.lazy(() => import('./pages/ResetPasswordConfirm'));
@@ -22,6 +23,7 @@ const Experience = React.lazy(() => import('./pages/Experience'));
 const Callouts = React.lazy(() => import('./pages/Callouts'));
 const Applications = React.lazy(() => import('./pages/Applications'));
 const Archive = React.lazy(() => import('./pages/Archive'));
+const Apply = React.lazy(() => import('./pages/Apply'));
 
 const LoadingFallback = () => (
   <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -70,6 +72,7 @@ const PrivateLayout = () => {
           <Route path="/" element={<Home />} />
           <Route path="/profile/:id" element={<Profile />} />
           <Route path="/opportunity/:id" element={<OpportunityDetails />} />
+          <Route path="/opportunity/:id/apply" element={<Apply />} />
           <Route path="/experience" element={<Experience />} />
           <Route path="/callouts" element={<Callouts />} />
           <Route path="/applications" element={<Applications />} />
@@ -96,6 +99,13 @@ function App() {
             </Fade>
           } />
           <Route path="/register" element={
+            <Fade in={true} timeout={300}>
+              <Box>
+                <SignUpOptions />
+              </Box>
+            </Fade>
+          } />
+          <Route path="/register/direct" element={
             <Fade in={true} timeout={300}>
               <Box>
                 <SignUp />

@@ -26,9 +26,10 @@ import {
   ArrowBack,
   Assignment as RequirementsIcon,
   Group as ParticipantsIcon,
+  Link as LinkIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import { opportunityService } from '../services/api';
+import { opportunityService, authService } from '../services/api';
 import Header from '../components/Header';
 import ApplicationForm from '../components/ApplicationForm';
 
@@ -57,6 +58,7 @@ const OpportunityDetails = () => {
   const [comment, setComment] = useState('');
   const [isApplicationFormOpen, setIsApplicationFormOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showApplicationLink, setShowApplicationLink] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -84,6 +86,14 @@ const OpportunityDetails = () => {
     e.preventDefault();
     // TODO: Implement comment submission
     setComment('');
+  };
+
+  const handleGetApplicationLink = () => {
+    if (!authService.isLoggedIn()) {
+      navigate('/register');
+      return;
+    }
+    navigate(`/opportunity/${id}/apply`);
   };
 
   if (loading) {
@@ -230,6 +240,48 @@ const OpportunityDetails = () => {
               </Box>
             </Box>
           </Paper>
+
+          <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={() => setIsApplicationFormOpen(true)}
+              sx={{
+                flex: 1,
+                py: 1.5,
+                backgroundColor: theme.palette.primary.main,
+                '&:hover': {
+                  backgroundColor: theme.palette.primary.dark,
+                },
+              }}
+            >
+              Apply Now
+            </Button>
+            <Button
+              variant="outlined"
+              size="large"
+              startIcon={<LinkIcon />}
+              onClick={() => {
+                if (!authService.isLoggedIn()) {
+                  navigate('/register');
+                  return;
+                }
+                navigate(`/opportunity/${id}/apply`);
+              }}
+              sx={{
+                flex: 1,
+                py: 1.5,
+                borderColor: theme.palette.primary.main,
+                color: theme.palette.primary.main,
+                '&:hover': {
+                  borderColor: theme.palette.primary.dark,
+                  backgroundColor: theme.palette.primary.light,
+                },
+              }}
+            >
+              Get Application Link
+            </Button>
+          </Box>
         </Container>
       </Box>
 
