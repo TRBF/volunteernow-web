@@ -10,14 +10,10 @@ import {
   ListItemAvatar,
   Avatar,
   Divider,
-  Button,
   CircularProgress,
-  IconButton,
-  Tooltip,
 } from '@mui/material';
 import {
   Campaign as CampaignIcon,
-  Close as CloseIcon,
 } from '@mui/icons-material';
 import { calloutsService } from '../services/api';
 
@@ -59,17 +55,6 @@ const CalloutPanel = () => {
   const handleCalloutClick = (callout: Callout) => {
     if (callout.opportunity?.id) {
       navigate(`/opportunity/${callout.opportunity.id}`);
-    }
-  };
-
-  const handleDismiss = async (calloutId: number) => {
-    try {
-      await calloutsService.dismissCallout(calloutId);
-      // Refresh the callouts list after dismissing
-      await fetchCallouts();
-    } catch (error) {
-      console.error('Error dismissing callout:', error);
-      alert('Failed to dismiss callout. Please try again.');
     }
   };
 
@@ -141,24 +126,6 @@ const CalloutPanel = () => {
                       </>
                     }
                   />
-                  <Tooltip title="Dismiss">
-                    <IconButton
-                      edge="end"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDismiss(callout.id);
-                      }}
-                      sx={{ 
-                        position: 'absolute', 
-                        right: 8,
-                        '&:hover': {
-                          backgroundColor: 'action.selected',
-                        }
-                      }}
-                    >
-                      <CloseIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
                 </ListItem>
                 <Divider sx={{ my: 2 }} />
               </React.Fragment>
