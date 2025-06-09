@@ -29,7 +29,7 @@ const Home = () => {
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
     >
-      <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
+      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
         <Box 
           component="main" 
           sx={{ 

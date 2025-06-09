@@ -13,7 +13,6 @@ export default function Layout({ children }: { children: ReactNode }) {
       sx={{
         display: 'flex',
         minHeight: '100vh',
-        backgroundColor: 'background.default'
       }}
     >
       <Box
