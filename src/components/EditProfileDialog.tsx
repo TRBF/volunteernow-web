@@ -14,6 +14,13 @@ import {
 import { PhotoCamera } from '@mui/icons-material';
 import { profileService } from '../services/api';
 
+// Helper function to get full media URL
+const getMediaUrl = (path: string | null) => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  return `https://api.volunteernow.ro${path}`;
+};
+
 interface EditProfileDialogProps {
   open: boolean;
   onClose: () => void;
@@ -46,16 +53,8 @@ const EditProfileDialog: React.FC<EditProfileDialogProps> = ({
   const [profilePicture, setProfilePicture] = useState<string>("");
 
   useEffect(() => {
-    const fetchProfilePicture = async () => {
-      try {
-        const pictureUrl = await profileService.getUserProfilePictureById(profile.id);
-        setProfilePicture(pictureUrl);
-      } catch (err) {
-        console.error('Error fetching profile picture:', err);
-      }
-    };
-    fetchProfilePicture();
-  }, [profile.id]);
+    setProfilePicture(getMediaUrl(profile.profile_picture));
+  }, [profile.profile_picture]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

@@ -19,7 +19,12 @@ import { Edit as EditIcon } from '@mui/icons-material';
 import { profileService, experienceService } from '../services/api';
 import EditProfileDialog from '../components/EditProfileDialog';
 
-const MEDIA_BASE_URL = 'https://api.volunteernow.ro';
+// Helper function to get full media URL
+const getMediaUrl = (path: string | null) => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  return `https://api.volunteernow.ro${path}`;
+};
 
 interface Profile {
   id: number;
@@ -159,7 +164,7 @@ const Profile = () => {
             {profile.cover_image && (
               <Box
                 component="img"
-                src={profile.cover_image}
+                src={getMediaUrl(profile.cover_image)}
                 alt="Cover"
                 sx={{
                   position: 'absolute',
@@ -174,7 +179,7 @@ const Profile = () => {
             )}
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'center', sm: 'flex-start' }, gap: 3 }}>
               <Avatar
-                src={profile.profile_picture}
+                src={getMediaUrl(profile.profile_picture)}
                 alt={profile.username}
                 sx={{ width: { xs: 120, sm: 150 }, height: { xs: 120, sm: 150 } }}
               />

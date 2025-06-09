@@ -36,6 +36,13 @@ import { opportunityService, authService } from '../services/api';
 import Header from '../components/Header';
 import ApplicationForm from '../components/ApplicationForm';
 
+// Helper function to get full media URL
+const getMediaUrl = (path: string | null) => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  return `https://api.volunteernow.ro${path}`;
+};
+
 interface Opportunity {
   id: string;
   title: string;
@@ -211,7 +218,7 @@ const OpportunityDetails = () => {
                   {opportunity.participants.map((participant) => (
                     <ListItem key={participant.id}>
                       <ListItemAvatar>
-                        <Avatar src={participant.profile_picture} />
+                        <Avatar src={getMediaUrl(participant.profile_picture)} />
                       </ListItemAvatar>
                       <ListItemText primary={participant.username} />
                     </ListItem>
