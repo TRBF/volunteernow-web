@@ -74,6 +74,7 @@ export const opportunityService = {
         })) : [],
       likes: data.like_count || 0,
         comments: data.comments || [],
+        external_application_url: data.external_application_url || undefined,
     };
   },
 
