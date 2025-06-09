@@ -35,6 +35,7 @@ import { motion } from 'framer-motion';
 import { opportunityService, authService } from '../services/api';
 import Header from '../components/Header';
 import ApplicationForm from '../components/ApplicationForm';
+import { applicationService } from '../services/applicationService';
 
 // Helper function to get full media URL
 const getMediaUrl = (path: string | null) => {
@@ -70,6 +71,7 @@ const OpportunityDetails = () => {
   const [isApplicationFormOpen, setIsApplicationFormOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [noApplicationForm, setNoApplicationForm] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -105,15 +107,22 @@ const OpportunityDetails = () => {
     setSnackbarOpen(true);
   };
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (!opportunity) return;
-
     if (opportunity.external_application_url) {
-      // Open external application URL in a new tab
       window.open(opportunity.external_application_url, '_blank');
-    } else {
-      // Navigate to registration if no external URL is set
-      navigate('/register');
+      return;
+    }
+    try {
+      const questions = await applicationService.getApplicationForm(Number(opportunity.id));
+      if (questions && questions.length > 0) {
+        setIsApplicationFormOpen(true);
+        setNoApplicationForm(false);
+      } else {
+        setNoApplicationForm(true);
+      }
+    } catch (err) {
+      setNoApplicationForm(true);
     }
   };
 
@@ -236,9 +245,15 @@ const OpportunityDetails = () => {
                     fullWidth
                     sx={{ mb: 3 }}
                     onClick={handleSignUp}
+                    disabled={noApplicationForm}
                   >
-                    {opportunity.external_application_url ? 'Apply Now' : 'Sign Up'}
+                    Apply Now
                   </Button>
+                  {noApplicationForm && (
+                    <Alert severity="info" sx={{ mt: 2 }}>
+                      No application form is available for this opportunity.
+                    </Alert>
+                  )}
 
                   <Divider sx={{ my: 3 }} />
 
@@ -276,6 +291,13 @@ const OpportunityDetails = () => {
         autoHideDuration={3000}
         onClose={() => setSnackbarOpen(false)}
         message="Opportunity link copied to clipboard"
+      />
+
+      <ApplicationForm
+        open={isApplicationFormOpen}
+        onClose={() => setIsApplicationFormOpen(false)}
+        opportunityId={Number(opportunity.id)}
+        opportunityTitle={opportunity.title}
       />
     </motion.div>
   );
