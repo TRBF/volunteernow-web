@@ -18,6 +18,9 @@ import {
   Grid,
   CircularProgress,
   Alert,
+  IconButton,
+  Tooltip,
+  Snackbar,
 } from '@mui/material';
 import {
   LocationOn,
@@ -26,7 +29,7 @@ import {
   ArrowBack,
   Assignment as RequirementsIcon,
   Group as ParticipantsIcon,
-  Link as LinkIcon,
+  Share as ShareIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { opportunityService, authService } from '../services/api';
@@ -47,6 +50,7 @@ interface Opportunity {
     username: string;
     profile_picture: string;
   }[];
+  external_application_url?: string;
 }
 
 const OpportunityDetails = () => {
@@ -58,7 +62,7 @@ const OpportunityDetails = () => {
   const [comment, setComment] = useState('');
   const [isApplicationFormOpen, setIsApplicationFormOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showApplicationLink, setShowApplicationLink] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -88,12 +92,22 @@ const OpportunityDetails = () => {
     setComment('');
   };
 
-  const handleGetApplicationLink = () => {
-    if (!authService.isLoggedIn()) {
+  const handleShare = () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url);
+    setSnackbarOpen(true);
+  };
+
+  const handleSignUp = () => {
+    if (!opportunity) return;
+
+    if (opportunity.external_application_url) {
+      // Open external application URL in a new tab
+      window.open(opportunity.external_application_url, '_blank');
+    } else {
+      // Navigate to registration if no external URL is set
       navigate('/register');
-      return;
     }
-    navigate(`/opportunity/${id}/apply`);
   };
 
   if (loading) {
@@ -134,9 +148,16 @@ const OpportunityDetails = () => {
           <Paper elevation={3} sx={{ p: 4 }}>
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 4 }}>
               <Box>
-                <Typography variant="h4" gutterBottom>
-                  {opportunity.title}
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                  <Typography variant="h4" gutterBottom>
+                    {opportunity.title}
+                  </Typography>
+                  <Tooltip title="Share opportunity">
+                    <IconButton onClick={handleShare} color="primary">
+                      <ShareIcon />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
                 <Box sx={{ mb: 3 }}>
                   <Chip
                     icon={<Business />}
@@ -207,9 +228,9 @@ const OpportunityDetails = () => {
                     variant="contained"
                     fullWidth
                     sx={{ mb: 3 }}
-                    onClick={() => setIsApplicationFormOpen(true)}
+                    onClick={handleSignUp}
                   >
-                    Sign Up
+                    {opportunity.external_application_url ? 'Apply Now' : 'Sign Up'}
                   </Button>
 
                   <Divider sx={{ my: 3 }} />
@@ -240,57 +261,14 @@ const OpportunityDetails = () => {
               </Box>
             </Box>
           </Paper>
-
-          <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
-            <Button
-              variant="contained"
-              size="large"
-              onClick={() => setIsApplicationFormOpen(true)}
-              sx={{
-                flex: 1,
-                py: 1.5,
-                backgroundColor: theme.palette.primary.main,
-                '&:hover': {
-                  backgroundColor: theme.palette.primary.dark,
-                },
-              }}
-            >
-              Apply Now
-            </Button>
-            <Button
-              variant="outlined"
-              size="large"
-              startIcon={<LinkIcon />}
-              onClick={() => {
-                if (!authService.isLoggedIn()) {
-                  navigate('/register');
-                  return;
-                }
-                navigate(`/opportunity/${id}/apply`);
-              }}
-              sx={{
-                flex: 1,
-                py: 1.5,
-                borderColor: theme.palette.primary.main,
-                color: theme.palette.primary.main,
-                '&:hover': {
-                  borderColor: theme.palette.primary.dark,
-                  backgroundColor: theme.palette.primary.light,
-                },
-              }}
-            >
-              Get Application Link
-            </Button>
-          </Box>
         </Container>
       </Box>
 
-      {/* Application Form Dialog */}
-      <ApplicationForm
-        open={isApplicationFormOpen}
-        onClose={() => setIsApplicationFormOpen(false)}
-        opportunityId={parseInt(id || '0')}
-        opportunityTitle={opportunity.title}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        message="Opportunity link copied to clipboard"
       />
     </motion.div>
   );
