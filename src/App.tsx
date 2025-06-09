@@ -13,7 +13,6 @@ import BottomNav from './components/BottomNavigation';
 // Lazy load components
 const Login = React.lazy(() => import('./pages/Login'));
 const SignUp = React.lazy(() => import('./pages/SignUp'));
-const SignUpOptions = React.lazy(() => import('./components/SignUpOptions'));
 const Home = React.lazy(() => import('./pages/Home'));
 const ForgotPassword = React.lazy(() => import('./pages/ForgotPassword'));
 const ResetPasswordConfirm = React.lazy(() => import('./pages/ResetPasswordConfirm'));
@@ -101,7 +100,7 @@ function App() {
           <Route path="/register" element={
             <Fade in={true} timeout={300}>
               <Box>
-                <SignUpOptions />
+                <SignUp />
               </Box>
             </Fade>
           } />
