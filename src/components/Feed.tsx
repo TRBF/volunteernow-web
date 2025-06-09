@@ -23,6 +23,7 @@ interface Opportunity {
   organization: string;
   image_url: string;
   likes: number;
+  liked: boolean;
 }
 
 const Feed = () => {
@@ -48,16 +49,43 @@ const Feed = () => {
   };
 
   const handleLike = async (opportunityId: number) => {
+    setOpportunities(prev =>
+      prev.map(opportunity =>
+        opportunity.id === opportunityId
+          ? {
+              ...opportunity,
+              liked: !opportunity.liked,
+              likes: opportunity.liked ? opportunity.likes - 1 : opportunity.likes + 1,
+            }
+          : opportunity
+      )
+    );
     try {
-      await opportunityService.likeOpportunity(opportunityId.toString());
+      const res = await opportunityService.likeOpportunity(opportunityId.toString());
       setOpportunities(prev =>
         prev.map(opportunity =>
           opportunity.id === opportunityId
-            ? { ...opportunity, likes: opportunity.likes + 1 }
+            ? {
+                ...opportunity,
+                liked: res.liked,
+                likes: res.like_count,
+              }
             : opportunity
         )
       );
     } catch (error) {
+      // Revert optimistic update on error
+      setOpportunities(prev =>
+        prev.map(opportunity =>
+          opportunity.id === opportunityId
+            ? {
+                ...opportunity,
+                liked: !opportunity.liked,
+                likes: opportunity.liked ? opportunity.likes + 1 : opportunity.likes - 1,
+              }
+            : opportunity
+        )
+      );
       console.error('Error liking opportunity:', error);
     }
   };
@@ -134,7 +162,7 @@ const Feed = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <IconButton size="small" onClick={() => handleLike(opportunity.id)}>
-                  {opportunity.likes > 0 ? <Favorite color="error" /> : <FavoriteBorder />}
+                  {opportunity.liked ? <Favorite color="error" /> : <FavoriteBorder />}
                 </IconButton>
                 <Typography variant="body2">{opportunity.likes || 0}</Typography>
               </Box>
