@@ -69,6 +69,7 @@ const CalloutPanel = () => {
       setDismissedCallouts(prev => [...prev, calloutId]);
     } catch (error) {
       console.error('Error dismissing callout:', error);
+      alert('Failed to dismiss callout. Please try again.');
     }
   };
 
