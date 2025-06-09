@@ -11,8 +11,8 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
-import { Business, LocationOn, CalendarToday, Favorite, FavoriteBorder } from '@mui/icons-material';
-import { opportunityService, authService } from '../services/api';
+import { Business, LocationOn, CalendarToday } from '@mui/icons-material';
+import { opportunityService } from '../services/api';
 
 interface Opportunity {
   id: number;
@@ -22,8 +22,6 @@ interface Opportunity {
   location: string;
   organization: string;
   image_url: string;
-  likes: number;
-  liked: boolean;
 }
 
 const Feed = () => {
@@ -45,65 +43,6 @@ const Feed = () => {
       console.error('Error fetching opportunities:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleLike = async (opportunityId: number) => {
-    if (!authService.isLoggedIn()) {
-      // Redirect to login if not authenticated
-      navigate('/login');
-      return;
-    }
-
-    // Store the current state before optimistic update
-    const currentOpportunity = opportunities.find(o => o.id === opportunityId);
-    if (!currentOpportunity) return;
-
-    // Optimistic update
-    setOpportunities(prev =>
-      prev.map(opportunity =>
-        opportunity.id === opportunityId
-          ? {
-              ...opportunity,
-              liked: !opportunity.liked,
-              likes: opportunity.liked ? Math.max(0, opportunity.likes - 1) : opportunity.likes + 1,
-            }
-          : opportunity
-      )
-    );
-
-    try {
-      const res = await opportunityService.likeOpportunity(opportunityId.toString());
-      // Update with backend response
-      setOpportunities(prev =>
-        prev.map(opportunity =>
-          opportunity.id === opportunityId
-            ? {
-                ...opportunity,
-                liked: res.liked,
-                likes: parseInt(res.like_count.toString(), 10),
-              }
-            : opportunity
-        )
-      );
-    } catch (error: any) {
-      // Revert to original state on error
-      setOpportunities(prev =>
-        prev.map(opportunity =>
-          opportunity.id === opportunityId
-            ? {
-                ...opportunity,
-                liked: currentOpportunity.liked,
-                likes: currentOpportunity.likes,
-              }
-            : opportunity
-        )
-      );
-      console.error('Error liking opportunity:', error);
-      if (error.response?.status === 401) {
-        // If unauthorized, redirect to login
-        navigate('/login');
-      }
     }
   };
 
@@ -176,13 +115,7 @@ const Feed = () => {
             >
               {opportunity.description}
             </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <IconButton size="small" onClick={() => handleLike(opportunity.id)}>
-                  {opportunity.liked ? <Favorite color="error" /> : <FavoriteBorder />}
-                </IconButton>
-                <Typography variant="body2">{opportunity.likes || 0}</Typography>
-              </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
               <Button
                 variant="contained"
                 size="small"

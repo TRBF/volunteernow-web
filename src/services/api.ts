@@ -49,8 +49,6 @@ export const opportunityService = {
         location: opportunity.location || '',
         date: opportunity.time || '', // API returns 'time' instead of 'date'
         organization: opportunity.organization || 'VolunteerNow',
-        likes: opportunity.like_count || 0, // API returns 'like_count' instead of 'likes'
-        liked: opportunity.liked || false,
         comments: opportunity.comments || [],
       }));
   },
@@ -73,17 +71,9 @@ export const opportunityService = {
           username: p.username || '',
           profile_picture: getMediaUrl(p.profile_picture),
         })) : [],
-        likes: data.like_count || 0,
-        liked: data.liked || false,
         comments: data.comments || [],
         external_application_url: data.external_application_url || undefined,
     };
-  },
-
-  // Expected response: { message: string }
-  likeOpportunity: async (opportunityId: string) => {
-    const response = await api.post(`/like_opportunity/${opportunityId}`);
-    return response.data; // { liked, like_count }
   },
 
   // Expected response: { message: string }
