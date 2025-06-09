@@ -39,7 +39,6 @@ const CalloutPanel = () => {
   const navigate = useNavigate();
   const [callouts, setCallouts] = useState<Callout[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dismissedCallouts, setDismissedCallouts] = useState<number[]>([]);
 
   useEffect(() => {
     fetchCallouts();
@@ -48,7 +47,7 @@ const CalloutPanel = () => {
   const fetchCallouts = async () => {
     try {
       setLoading(true);
-      const data = await calloutsService.getCallouts();
+      const data = await calloutsService.getUserCallouts();
       setCallouts(data);
     } catch (error) {
       console.error('Error fetching callouts:', error);
@@ -66,14 +65,13 @@ const CalloutPanel = () => {
   const handleDismiss = async (calloutId: number) => {
     try {
       await calloutsService.dismissCallout(calloutId);
-      setDismissedCallouts(prev => [...prev, calloutId]);
+      // Refresh the callouts list after dismissing
+      await fetchCallouts();
     } catch (error) {
       console.error('Error dismissing callout:', error);
       alert('Failed to dismiss callout. Please try again.');
     }
   };
-
-  const visibleCallouts = callouts.filter(callout => !dismissedCallouts.includes(callout.id));
 
   if (loading) {
     return (
@@ -89,7 +87,7 @@ const CalloutPanel = () => {
       sx={{ 
         borderRadius: 2,
         mb: 2,
-        maxHeight: 'calc(100vh - 200px)', // Adjust this value based on your needs
+        maxHeight: 'calc(100vh - 200px)',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
@@ -105,8 +103,8 @@ const CalloutPanel = () => {
       </Box>
       <Box sx={{ overflowY: 'auto', flex: 1, px: 3 }}>
         <List sx={{ '& .MuiListItem-root': { mb: 2 } }}>
-          {visibleCallouts.length > 0 ? (
-            visibleCallouts.map((callout) => (
+          {callouts.length > 0 ? (
+            callouts.map((callout) => (
               <React.Fragment key={callout.id}>
                 <ListItem
                   onClick={() => handleCalloutClick(callout)}
