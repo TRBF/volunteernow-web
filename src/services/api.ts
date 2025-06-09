@@ -400,7 +400,11 @@ export const calloutsService = {
 
   // Expected response: { message: string }
   dismissCallout: async (calloutId: number) => {
-    const response = await api.post(`/dismiss_callout/${calloutId}/`);
+    const userId = localStorage.getItem('user_id');
+    if (!userId) {
+      throw new Error('User not authenticated');
+    }
+    const response = await api.post(`/dismiss_callout/${calloutId}/`, { user: parseInt(userId) });
     return response.data;
   },
 
