@@ -78,7 +78,34 @@ export const opportunityService = {
 
   // Expected response: { message: string }
   addComment: async (opportunityId: string, content: string) => {
-    const response = await api.post(`/add_comment/${opportunityId}`, { content });
+    const response = await api.post(`/add_comment/${opportunityId}/`, { content });
+    return response.data;
+  },
+};
+
+// Comment Service
+export const commentService = {
+  // Get all comments for an opportunity
+  getOpportunityComments: async (opportunityId: string) => {
+    const response = await api.get(`/opportunity/${opportunityId}/comments/`);
+    return response.data;
+  },
+
+  // Add a comment to an opportunity
+  addComment: async (opportunityId: string, content: string) => {
+    const response = await api.post(`/add_comment/${opportunityId}/`, { content });
+    return response.data;
+  },
+
+  // Update a comment
+  updateComment: async (commentId: string, content: string) => {
+    const response = await api.put(`/update_comment/${commentId}/`, { content });
+    return response.data;
+  },
+
+  // Delete a comment
+  deleteComment: async (commentId: string) => {
+    const response = await api.delete(`/delete_comment/${commentId}/`);
     return response.data;
   },
 };

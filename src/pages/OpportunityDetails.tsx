@@ -32,10 +32,11 @@ import {
   Share as ShareIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import { opportunityService, authService } from '../services/api';
+import { opportunityService, authService, commentService } from '../services/api';
+import { applicationService } from '../services/applicationService';
 import Header from '../components/Header';
 import ApplicationForm from '../components/ApplicationForm';
-import { applicationService } from '../services/applicationService';
+import Comment from '../components/Comment';
 
 // Helper function to get full media URL
 const getMediaUrl = (path: string | null) => {
@@ -68,14 +69,20 @@ const OpportunityDetails = () => {
   const [opportunity, setOpportunity] = useState<Opportunity | null>(null);
   const [loading, setLoading] = useState(true);
   const [comment, setComment] = useState('');
+  const [comments, setComments] = useState<any[]>([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
   const [isApplicationFormOpen, setIsApplicationFormOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [noApplicationForm, setNoApplicationForm] = useState(false);
+  const [submittingComment, setSubmittingComment] = useState(false);
+
+  const currentUserId = localStorage.getItem('user_id') || undefined;
 
   useEffect(() => {
     if (id) {
       fetchOpportunityDetails(id);
+      fetchComments(id);
     }
   }, [id]);
 
@@ -91,14 +98,50 @@ const OpportunityDetails = () => {
     }
   };
 
+  const fetchComments = async (opportunityId: string) => {
+    setCommentsLoading(true);
+    try {
+      const data = await commentService.getOpportunityComments(opportunityId);
+      setComments(data);
+    } catch (err) {
+      console.error('Error fetching comments:', err);
+    } finally {
+      setCommentsLoading(false);
+    }
+  };
+
   const handleBack = () => {
     navigate(-1);
   };
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement comment submission
-    setComment('');
+    if (!comment.trim() || !id) return;
+
+    setSubmittingComment(true);
+    try {
+      await commentService.addComment(id, comment);
+      setComment('');
+      // Refresh comments
+      await fetchComments(id);
+    } catch (err) {
+      console.error('Error submitting comment:', err);
+      alert('Failed to submit comment. Please try again.');
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
+
+  const handleCommentUpdated = () => {
+    if (id) {
+      fetchComments(id);
+    }
+  };
+
+  const handleCommentDeleted = () => {
+    if (id) {
+      fetchComments(id);
+    }
   };
 
   const handleShare = () => {
@@ -258,8 +301,33 @@ const OpportunityDetails = () => {
                   <Divider sx={{ my: 3 }} />
 
                   <Typography variant="h6" gutterBottom>
-                    Comments
+                    Comments ({comments.length})
                   </Typography>
+                  
+                  {commentsLoading ? (
+                    <Box display="flex" justifyContent="center" py={2}>
+                      <CircularProgress size={24} />
+                    </Box>
+                  ) : (
+                    <Box sx={{ maxHeight: 400, overflowY: 'auto', mb: 2 }}>
+                      {comments.length === 0 ? (
+                        <Typography variant="body2" color="text.secondary" textAlign="center" py={2}>
+                          No comments yet. Be the first to comment!
+                        </Typography>
+                      ) : (
+                        comments.map((comment) => (
+                          <Comment
+                            key={comment.id}
+                            comment={comment}
+                            currentUserId={currentUserId}
+                            onCommentUpdated={handleCommentUpdated}
+                            onCommentDeleted={handleCommentDeleted}
+                          />
+                        ))
+                      )}
+                    </Box>
+                  )}
+
                   <Box component="form" onSubmit={handleCommentSubmit}>
                     <TextField
                       fullWidth
@@ -269,14 +337,15 @@ const OpportunityDetails = () => {
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
                       sx={{ mb: 2 }}
+                      disabled={submittingComment}
                     />
                     <Button
                       type="submit"
                       variant="contained"
                       fullWidth
-                      disabled={!comment.trim()}
+                      disabled={!comment.trim() || submittingComment}
                     >
-                      Post Comment
+                      {submittingComment ? 'Posting...' : 'Post Comment'}
                     </Button>
                   </Box>
                 </Paper>
