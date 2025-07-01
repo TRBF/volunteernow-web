@@ -101,10 +101,17 @@ const OpportunityDetails = () => {
   const fetchComments = async (opportunityId: string) => {
     setCommentsLoading(true);
     try {
+      console.log('Fetching comments for opportunity:', opportunityId);
       const data = await commentService.getOpportunityComments(opportunityId);
+      console.log('Comments fetched successfully:', data);
       setComments(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching comments:', err);
+      if (err.response) {
+        console.error('Response data:', err.response.data);
+        console.error('Response status:', err.response.status);
+      }
+      setComments([]);
     } finally {
       setCommentsLoading(false);
     }
@@ -118,15 +125,36 @@ const OpportunityDetails = () => {
     e.preventDefault();
     if (!comment.trim() || !id) return;
 
+    // Check if user is authenticated
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please log in to post comments.');
+      return;
+    }
+
     setSubmittingComment(true);
     try {
-      await commentService.addComment(id, comment);
+      console.log('Submitting comment:', { opportunityId: id, content: comment });
+      const result = await commentService.addComment(id, comment);
+      console.log('Comment submitted successfully:', result);
       setComment('');
       // Refresh comments
       await fetchComments(id);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error submitting comment:', err);
-      alert('Failed to submit comment. Please try again.');
+      if (err.response) {
+        console.error('Response data:', err.response.data);
+        console.error('Response status:', err.response.status);
+        if (err.response.status === 401) {
+          alert('Please log in to post comments.');
+        } else if (err.response.status === 400) {
+          alert('Invalid comment data. Please try again.');
+        } else {
+          alert(`Failed to submit comment: ${err.response.data?.error || 'Unknown error'}`);
+        }
+      } else {
+        alert('Failed to submit comment. Please try again.');
+      }
     } finally {
       setSubmittingComment(false);
     }
@@ -328,26 +356,32 @@ const OpportunityDetails = () => {
                     </Box>
                   )}
 
-                  <Box component="form" onSubmit={handleCommentSubmit}>
-                    <TextField
-                      fullWidth
-                      multiline
-                      rows={3}
-                      placeholder="Add a comment..."
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
-                      sx={{ mb: 2 }}
-                      disabled={submittingComment}
-                    />
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      fullWidth
-                      disabled={!comment.trim() || submittingComment}
-                    >
-                      {submittingComment ? 'Posting...' : 'Post Comment'}
-                    </Button>
-                  </Box>
+                  {currentUserId ? (
+                    <Box component="form" onSubmit={handleCommentSubmit}>
+                      <TextField
+                        fullWidth
+                        multiline
+                        rows={3}
+                        placeholder="Add a comment..."
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        sx={{ mb: 2 }}
+                        disabled={submittingComment}
+                      />
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        fullWidth
+                        disabled={!comment.trim() || submittingComment}
+                      >
+                        {submittingComment ? 'Posting...' : 'Post Comment'}
+                      </Button>
+                    </Box>
+                  ) : (
+                    <Alert severity="info" sx={{ mt: 2 }}>
+                      Please log in to post comments.
+                    </Alert>
+                  )}
                 </Paper>
               </Box>
             </Box>

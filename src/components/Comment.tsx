@@ -22,6 +22,7 @@ interface CommentProps {
     user_profile_picture: string;
     user_first_name: string;
     user_last_name: string;
+    user: string; // This is the user ID from the backend
   };
   currentUserId?: string;
   onCommentUpdated: () => void;
@@ -107,6 +108,9 @@ const Comment: React.FC<CommentProps> = ({
     ? `${comment.user_first_name} ${comment.user_last_name}`
     : comment.user_username;
 
+  // Check if current user can edit/delete this comment
+  const canEdit = currentUserId && comment.user === currentUserId;
+
   return (
     <Paper elevation={1} sx={{ p: 2, mb: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
@@ -125,7 +129,7 @@ const Comment: React.FC<CommentProps> = ({
                 {formatDate(comment.created_at)}
               </Typography>
             </Box>
-            {currentUserId && (
+            {canEdit && (
               <IconButton size="small" onClick={handleMenuOpen}>
                 <MoreVert />
               </IconButton>
