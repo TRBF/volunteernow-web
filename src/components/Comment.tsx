@@ -149,19 +149,19 @@ export const Comment: React.FC<CommentProps> = ({
       <Paper sx={{ p: 2, mb: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
           <Avatar
-            src={comment.user.profile_picture || undefined}
-            alt={comment.user.username}
+            src={comment.user?.profile_picture || undefined}
+            alt={comment.user?.username || 'User'}
           >
-            {comment.user.first_name?.[0] || comment.user.username[0]}
+            {(comment.user?.first_name && comment.user.first_name[0]) || (comment.user?.username && comment.user.username[0]) || '?'}
           </Avatar>
           
           <Box sx={{ flex: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
               <Typography variant="subtitle2" fontWeight="bold">
-                {comment.user.first_name} {comment.user.last_name}
+                {(comment.user?.first_name || '') + ' ' + (comment.user?.last_name || '')}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                @{comment.user.username}
+                @{comment.user?.username || 'unknown'}
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 {formatDate(comment.created_at)}
