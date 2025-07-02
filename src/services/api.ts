@@ -561,4 +561,78 @@ export const fileService = {
     const response = await api.post('/upload_file/', formData);
     return response.data;
   },
+};
+
+// Report Service
+export const reportService = {
+  reportUser: async (reportedUserId: number, reportType: string, description: string) => {
+    const response = await fetch(`${API_BASE_URL}/report_user/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Token ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify({
+        reported_user: reportedUserId,
+        report_type: reportType,
+        description: description
+      }),
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to report user');
+    }
+    
+    return response.json();
+  },
+
+  getUserReports: async () => {
+    const response = await fetch(`${API_BASE_URL}/get_user_reports/`, {
+      headers: {
+        'Authorization': `Token ${localStorage.getItem('token')}`,
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch reports');
+    }
+    
+    return response.json();
+  },
+
+  updateReportStatus: async (reportId: number, status: string) => {
+    const response = await fetch(`${API_BASE_URL}/update_report_status/${reportId}/`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Token ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify({ status }),
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to update report status');
+    }
+    
+    return response.json();
+  }
+};
+
+// User Search Service
+export const userSearchService = {
+  searchUsers: async (query: string) => {
+    const response = await fetch(`${API_BASE_URL}/search_users/${encodeURIComponent(query)}/`, {
+      headers: {
+        'Authorization': `Token ${localStorage.getItem('token')}`,
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to search users');
+    }
+    
+    return response.json();
+  }
 }; 

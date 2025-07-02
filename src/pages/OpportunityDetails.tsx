@@ -21,6 +21,12 @@ import {
   IconButton,
   Tooltip,
   Snackbar,
+  Card,
+  CardContent,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import {
   LocationOn,
@@ -30,13 +36,21 @@ import {
   Assignment as RequirementsIcon,
   Group as ParticipantsIcon,
   Share as ShareIcon,
+  AccessTime,
+  Edit,
+  Delete,
+  Favorite,
+  FavoriteBorder,
+  Comment as CommentIcon,
+  Send,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { opportunityService, authService, commentService } from '../services/api';
 import { applicationService } from '../services/applicationService';
 import Header from '../components/Header';
 import ApplicationForm from '../components/ApplicationForm';
-import Comment from '../components/Comment';
+import { Comment } from '../components/Comment';
+import { UserSearch } from '../components/UserSearch';
 
 // Helper function to get full media URL
 const getMediaUrl = (path: string | null) => {
@@ -76,8 +90,13 @@ const OpportunityDetails = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [noApplicationForm, setNoApplicationForm] = useState(false);
   const [submittingComment, setSubmittingComment] = useState(false);
+  const [newComment, setNewComment] = useState('');
+  const [commentLoading, setCommentLoading] = useState(false);
+  const [showUserSearch, setShowUserSearch] = useState(false);
+  const [userSearchQuery, setUserSearchQuery] = useState('');
+  const [cursorPosition, setCursorPosition] = useState(0);
 
-  const currentUserId = localStorage.getItem('user_id') || undefined;
+  const currentUserId = localStorage.getItem('user_id') ? parseInt(localStorage.getItem('user_id')!) : undefined;
 
   useEffect(() => {
     if (id) {
@@ -121,42 +140,57 @@ const OpportunityDetails = () => {
     navigate(-1);
   };
 
-  const handleCommentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!comment.trim() || !id) return;
+  const handleCommentSubmit = async () => {
+    if (!newComment.trim() || !id) return;
 
-    // Check if user is authenticated
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Please log in to post comments.');
-      return;
-    }
-
-    setSubmittingComment(true);
+    setCommentLoading(true);
     try {
-      console.log('Submitting comment:', { opportunityId: id, content: comment });
-      const result = await commentService.addComment(id, comment);
-      console.log('Comment submitted successfully:', result);
-      setComment('');
-      // Refresh comments
-      await fetchComments(id);
-    } catch (err: any) {
-      console.error('Error submitting comment:', err);
-      if (err.response) {
-        console.error('Response data:', err.response.data);
-        console.error('Response status:', err.response.status);
-        if (err.response.status === 401) {
-          alert('Please log in to post comments.');
-        } else if (err.response.status === 400) {
-          alert('Invalid comment data. Please try again.');
-        } else {
-          alert(`Failed to submit comment: ${err.response.data?.error || 'Unknown error'}`);
-        }
-      } else {
-        alert('Failed to submit comment. Please try again.');
-      }
+      await commentService.addComment(id, newComment);
+      setNewComment('');
+      fetchComments(id); // Refresh comments
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      setError('Failed to add comment');
     } finally {
-      setSubmittingComment(false);
+      setCommentLoading(false);
+    }
+  };
+
+  const handleUserSelect = (user: any) => {
+    const beforeCursor = newComment.substring(0, cursorPosition);
+    const afterCursor = newComment.substring(cursorPosition);
+    
+    // Find the @ symbol and replace it with the username
+    const lastAtIndex = beforeCursor.lastIndexOf('@');
+    if (lastAtIndex !== -1) {
+      const newContent = beforeCursor.substring(0, lastAtIndex) + `@${user.username} ` + afterCursor;
+      setNewComment(newContent);
+      setShowUserSearch(false);
+      setUserSearchQuery('');
+    }
+  };
+
+  const handleCommentInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setNewComment(value);
+    
+    // Check for @ symbol to show user search
+    const cursorPos = e.target.selectionStart || 0;
+    setCursorPosition(cursorPos);
+    
+    const beforeCursor = value.substring(0, cursorPos);
+    const lastAtIndex = beforeCursor.lastIndexOf('@');
+    
+    if (lastAtIndex !== -1) {
+      const query = beforeCursor.substring(lastAtIndex + 1);
+      if (query.length >= 1) {
+        setUserSearchQuery(query);
+        setShowUserSearch(true);
+      } else {
+        setShowUserSearch(false);
+      }
+    } else {
+      setShowUserSearch(false);
     }
   };
 
@@ -357,25 +391,37 @@ const OpportunityDetails = () => {
                   )}
 
                   {currentUserId ? (
-                    <Box component="form" onSubmit={handleCommentSubmit}>
+                    <Box sx={{ mb: 3, position: 'relative' }}>
                       <TextField
                         fullWidth
                         multiline
                         rows={3}
-                        placeholder="Add a comment..."
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                        sx={{ mb: 2 }}
-                        disabled={submittingComment}
+                        placeholder="Add a comment... Use @ to tag users"
+                        value={newComment}
+                        onChange={handleCommentInputChange}
+                        disabled={commentLoading}
+                        sx={{ mb: 1 }}
                       />
-                      <Button
-                        type="submit"
-                        variant="contained"
-                        fullWidth
-                        disabled={!comment.trim() || submittingComment}
-                      >
-                        {submittingComment ? 'Posting...' : 'Post Comment'}
-                      </Button>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="caption" color="text.secondary">
+                          Press @ to tag users
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          endIcon={<Send />}
+                          onClick={handleCommentSubmit}
+                          disabled={commentLoading || !newComment.trim()}
+                        >
+                          {commentLoading ? <CircularProgress size={20} /> : 'Post Comment'}
+                        </Button>
+                      </Box>
+                      
+                      {/* User Search Dropdown */}
+                      <UserSearch
+                        query={userSearchQuery}
+                        onUserSelect={handleUserSelect}
+                        visible={showUserSearch}
+                      />
                     </Box>
                   ) : (
                     <Alert severity="info" sx={{ mt: 2 }}>
