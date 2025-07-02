@@ -83,7 +83,7 @@ export const ReportUser: React.FC<ReportUserProps> = ({
       <DialogTitle>Report User</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          You are reporting <strong>{reportedUsername}</strong>
+          You are reporting <strong>{reportedUsername || 'this user'}</strong>
         </Typography>
 
         {success && (

@@ -140,14 +140,24 @@ export const authService = {
           }
         });
         
+        // Get profile ID
+        const profileResponse = await api.get('/get_profile_id/', {
+          headers: {
+            'Authorization': `Token ${token}`
+          }
+        });
+        
         const userId = idResponse.data.id;
+        const profileId = profileResponse.data.profile_id;
         localStorage.setItem('user_id', userId.toString());
+        localStorage.setItem('profile_id', profileId.toString());
         localStorage.setItem('username', credentials.username);
 
         return {
           token: token,
           user: {
             id: userId,
+            profile_id: profileId,
             username: credentials.username
           }
         };
@@ -580,8 +590,8 @@ export const reportService = {
     });
     
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to report user');
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
     }
     
     return response.json();

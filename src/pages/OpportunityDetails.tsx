@@ -96,7 +96,7 @@ const OpportunityDetails = () => {
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
 
-  const currentUserId = localStorage.getItem('user_id') ? parseInt(localStorage.getItem('user_id')!) : undefined;
+  const currentUserId = localStorage.getItem('profile_id') ? parseInt(localStorage.getItem('profile_id')!) : undefined;
 
   useEffect(() => {
     if (id) {

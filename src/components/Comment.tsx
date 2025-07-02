@@ -21,13 +21,11 @@ interface CommentProps {
     id: number;
     content: string;
     created_at: string;
-    user: {
-      id: number;
-      username: string;
-      first_name: string;
-      last_name: string;
-      profile_picture: string | null;
-    };
+    user: number; // UserProfile ID
+    user_username: string;
+    user_first_name: string;
+    user_last_name: string;
+    user_profile_picture: string | null;
     tagged_users?: Array<{
       id: number;
       username: string;
@@ -52,9 +50,17 @@ export const Comment: React.FC<CommentProps> = ({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showReportDialog, setShowReportDialog] = useState(false);
 
-  const isOwnComment = currentUserId === comment.user.id;
+  const isOwnComment = currentUserId === comment.user;
   const canEdit = isOwnComment;
   const canDelete = isOwnComment;
+
+  // Handle missing user data gracefully
+  const userDisplayName = comment.user_first_name && comment.user_last_name 
+    ? `${comment.user_first_name} ${comment.user_last_name}`.trim()
+    : comment.user_username || 'Unknown User';
+  
+  const userInitial = (comment.user_first_name && comment.user_first_name[0]) || 
+                     (comment.user_username && comment.user_username[0]) || '?';
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -149,19 +155,19 @@ export const Comment: React.FC<CommentProps> = ({
       <Paper sx={{ p: 2, mb: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
           <Avatar
-            src={comment.user?.profile_picture || undefined}
-            alt={comment.user?.username || 'User'}
+            src={comment.user_profile_picture || undefined}
+            alt={comment.user_username || 'User'}
           >
-            {(comment.user?.first_name && comment.user.first_name[0]) || (comment.user?.username && comment.user.username[0]) || '?'}
+            {userInitial}
           </Avatar>
           
           <Box sx={{ flex: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
               <Typography variant="subtitle2" fontWeight="bold">
-                {(comment.user?.first_name || '') + ' ' + (comment.user?.last_name || '')}
+                {userDisplayName}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                @{comment.user?.username || 'unknown'}
+                @{comment.user_username || 'unknown'}
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 {formatDate(comment.created_at)}
@@ -241,8 +247,8 @@ export const Comment: React.FC<CommentProps> = ({
       <ReportUser
         open={showReportDialog}
         onClose={() => setShowReportDialog(false)}
-        reportedUserId={comment.user.id}
-        reportedUsername={comment.user.username}
+        reportedUserId={comment.user}
+        reportedUsername={comment.user_username}
       />
     </>
   );
