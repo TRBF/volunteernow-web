@@ -16,7 +16,7 @@ const ResetPasswordConfirm = () => {
   useEffect(() => {
     // Redirect to the backend's password reset confirmation page
     if (uidb64 && token) {
-      window.location.href = `https://api.volunteernow.eu/api/reset/${uidb64}/${token}/`;
+      window.location.href = `https://api.volunteernow.ro/api/reset/${uidb64}/${token}/`;
     }
   }, [uidb64, token]);
 

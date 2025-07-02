@@ -9,7 +9,7 @@ import {
   ApplicationValidationError 
 } from '../types/application';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://api.volunteernow.eu/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://api.volunteernow.ro/api';
 
 class ApplicationService {
   private api = axios.create({

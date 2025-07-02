@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://api.volunteernow.eu/api';
-const MEDIA_BASE_URL = 'https://api.volunteernow.eu';
+const API_BASE_URL = 'https://api.volunteernow.ro/api';
+const MEDIA_BASE_URL = 'https://api.volunteernow.ro';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
