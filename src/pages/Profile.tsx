@@ -23,7 +23,7 @@ import EditProfileDialog from '../components/EditProfileDialog';
 const getMediaUrl = (path: string | null) => {
   if (!path) return '';
   if (path.startsWith('http')) return path;
-  return `https://api.volunteernow.ro${path}`;
+  return `https://api.volunteernow.eu${path}`;
 };
 
 interface Profile {

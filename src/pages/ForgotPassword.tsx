@@ -15,7 +15,7 @@ const ForgotPassword = () => {
 
   useEffect(() => {
     // Redirect to the backend's password reset page
-    window.location.href = 'https://api.volunteernow.ro/api/reset_password/';
+    window.location.href = 'https://api.volunteernow.eu/api/reset_password/';
   }, []);
 
   return (

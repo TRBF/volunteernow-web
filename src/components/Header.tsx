@@ -40,7 +40,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService, searchService } from '../services/api';
 
-const MEDIA_BASE_URL = 'https://api.volunteernow.ro';
+const MEDIA_BASE_URL = 'https://api.volunteernow.eu';
 
 interface HeaderProps {
   searchQuery?: string;

@@ -23,7 +23,7 @@ import { Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon, Image as ImageI
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { experienceService } from '../services/api';
 
-const MEDIA_BASE_URL = 'https://api.volunteernow.ro';
+const MEDIA_BASE_URL = 'https://api.volunteernow.eu';
 
 interface Experience {
   id: string;

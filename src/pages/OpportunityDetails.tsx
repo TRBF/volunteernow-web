@@ -42,7 +42,7 @@ import Comment from '../components/Comment';
 const getMediaUrl = (path: string | null) => {
   if (!path) return '';
   if (path.startsWith('http')) return path;
-  return `https://api.volunteernow.ro${path}`;
+  return `https://api.volunteernow.eu${path}`;
 };
 
 interface Opportunity {

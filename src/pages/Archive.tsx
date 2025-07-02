@@ -24,7 +24,7 @@ import {
 } from '@mui/icons-material';
 import { archiveService } from '../services/api';
 
-const MEDIA_BASE_URL = 'https://api.volunteernow.ro';
+const MEDIA_BASE_URL = 'https://api.volunteernow.eu';
 
 interface PastEvent {
   id: number;
