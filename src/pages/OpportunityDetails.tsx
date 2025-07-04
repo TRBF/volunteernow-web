@@ -9,24 +9,11 @@ import {
   Chip,
   Divider,
   TextField,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
-  Avatar,
-  useTheme,
-  Grid,
   CircularProgress,
   Alert,
   IconButton,
   Tooltip,
   Snackbar,
-  Card,
-  CardContent,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from '@mui/material';
 import {
   LocationOn,
@@ -34,20 +21,12 @@ import {
   Business,
   ArrowBack,
   Assignment as RequirementsIcon,
-  Group as ParticipantsIcon,
   Share as ShareIcon,
-  AccessTime,
-  Edit,
-  Delete,
-  Favorite,
-  FavoriteBorder,
-  Comment as CommentIcon,
   Send,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { opportunityService, authService, commentService } from '../services/api';
 import { applicationService } from '../services/applicationService';
-import Header from '../components/Header';
 import ApplicationForm from '../components/ApplicationForm';
 import { Comment } from '../components/Comment';
 import { UserSearch } from '../components/UserSearch';
@@ -68,28 +47,20 @@ interface Opportunity {
   date: string;
   organization: string;
   requirements: string[];
-  participants: {
-    id: string;
-    username: string;
-    profile_picture: string;
-  }[];
   external_application_url?: string;
 }
 
 const OpportunityDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const theme = useTheme();
   const [opportunity, setOpportunity] = useState<Opportunity | null>(null);
   const [loading, setLoading] = useState(true);
-  const [comment, setComment] = useState('');
   const [comments, setComments] = useState<any[]>([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [isApplicationFormOpen, setIsApplicationFormOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [noApplicationForm, setNoApplicationForm] = useState(false);
-  const [submittingComment, setSubmittingComment] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [commentLoading, setCommentLoading] = useState(false);
   const [showUserSearch, setShowUserSearch] = useState(false);
@@ -359,29 +330,13 @@ const OpportunityDetails = () => {
                 <Typography variant="h6" gutterBottom>
                   Requirements
                 </Typography>
-                <List>
+                <Box sx={{ pl: 2 }}>
                   {opportunity.requirements.map((req, index) => (
-                    <ListItem key={index}>
-                      <ListItemText primary={req} />
-                    </ListItem>
+                    <Typography key={index} variant="body2" sx={{ mb: 1 }}>
+                      • {req}
+                    </Typography>
                   ))}
-                </List>
-
-                <Divider sx={{ my: 4 }} />
-
-                <Typography variant="h6" gutterBottom>
-                  Participants
-                </Typography>
-                <List>
-                  {opportunity.participants.map((participant) => (
-                    <ListItem key={participant.id}>
-                      <ListItemAvatar>
-                        <Avatar src={getMediaUrl(participant.profile_picture)} />
-                      </ListItemAvatar>
-                      <ListItemText primary={participant.username} />
-                    </ListItem>
-                  ))}
-                </List>
+                </Box>
               </Box>
 
               <Box>
