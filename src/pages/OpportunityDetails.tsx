@@ -95,15 +95,59 @@ const OpportunityDetails = () => {
   const [showUserSearch, setShowUserSearch] = useState(false);
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const currentUserId = localStorage.getItem('profile_id') ? parseInt(localStorage.getItem('profile_id')!) : undefined;
+  
+  // Debug logging
+  console.log('Debug - localStorage contents:', {
+    token: localStorage.getItem('token'),
+    user_id: localStorage.getItem('user_id'),
+    profile_id: localStorage.getItem('profile_id'),
+    username: localStorage.getItem('username')
+  });
+  console.log('Debug - currentUserId:', currentUserId);
+  
+  const fetchProfileIdIfNeeded = async () => {
+    const token = localStorage.getItem('token');
+    const profileId = localStorage.getItem('profile_id');
+    
+    // Update login state using authService.isLoggedIn() for consistency
+    setIsLoggedIn(authService.isLoggedIn());
+    
+    if (token && !profileId) {
+      try {
+        console.log('Profile ID missing, fetching...');
+        const response = await fetch('https://api.volunteernow.ro/api/get_profile_id/', {
+          headers: {
+            'Authorization': `Token ${token}`,
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          localStorage.setItem('profile_id', data.profile_id.toString());
+          console.log('Profile ID fetched and stored:', data.profile_id);
+          // Don't update isLoggedIn here since authService.isLoggedIn() only checks for token
+        }
+      } catch (error) {
+        console.error('Error fetching profile ID:', error);
+      }
+    }
+  };
 
   useEffect(() => {
     if (id) {
       fetchOpportunityDetails(id);
       fetchComments(id);
     }
+    fetchProfileIdIfNeeded();
   }, [id]);
+
+  // Initialize login state on mount using authService for consistency
+  useEffect(() => {
+    setIsLoggedIn(authService.isLoggedIn());
+  }, []);
 
   const fetchOpportunityDetails = async (opportunityId: string) => {
     try {
@@ -390,7 +434,7 @@ const OpportunityDetails = () => {
                     </Box>
                   )}
 
-                  {currentUserId ? (
+                  {isLoggedIn ? (
                     <Box sx={{ mb: 3, position: 'relative' }}>
                       <TextField
                         fullWidth

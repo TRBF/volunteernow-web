@@ -54,6 +54,18 @@ export const Comment: React.FC<CommentProps> = ({
   const canEdit = isOwnComment;
   const canDelete = isOwnComment;
 
+  // Debug logging for ownership detection
+  console.log('Comment ownership debug:', {
+    commentId: comment.id,
+    commentUserId: comment.user,
+    commentUserType: typeof comment.user,
+    currentUserId: currentUserId,
+    currentUserIdType: typeof currentUserId,
+    isOwnComment: isOwnComment,
+    canEdit: canEdit,
+    canDelete: canDelete
+  });
+
   // Handle missing user data gracefully
   const userDisplayName = comment.user_first_name && comment.user_last_name 
     ? `${comment.user_first_name} ${comment.user_last_name}`.trim()
