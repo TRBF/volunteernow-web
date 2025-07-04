@@ -321,7 +321,16 @@ const OpportunityDetails = () => {
                     mb: 3,
                   }}
                 />
-                <Typography variant="body1" paragraph>
+                <Typography 
+                  variant="body1" 
+                  paragraph
+                  sx={{
+                    whiteSpace: 'pre-wrap',
+                    lineHeight: 1.6,
+                    textAlign: 'justify',
+                    mb: 3
+                  }}
+                >
                   {opportunity.description}
                 </Typography>
 
