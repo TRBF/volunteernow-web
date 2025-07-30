@@ -78,6 +78,11 @@ export const theme = createTheme({
       styleOverrides: {
         body: {
           background: 'linear-gradient(135deg, #fbf2ff 0%, #f0e6ff 100%)',
+          backgroundImage: `
+            linear-gradient(135deg, #fbf2ff 0%, #f0e6ff 100%),
+            radial-gradient(circle at 1px 1px, ${alpha('#8027ab', 0.6)} 1px, transparent 1px)
+          `,
+          backgroundSize: '100% 100%, 12px 12px',
           minHeight: '100vh',
         },
       },

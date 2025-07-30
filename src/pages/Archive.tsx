@@ -117,7 +117,7 @@ const Archive = () => {
                 <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
                   <Box
                     component="img"
-                    src={getImageUrl(event.post_image)}
+                    src={getImageUrl(event.profile_picture || event.post_image)}
                     alt={event.name}
                     sx={{
                       width: { xs: '100%', md: '300px' },

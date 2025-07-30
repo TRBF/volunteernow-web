@@ -83,7 +83,12 @@ const Feed = () => {
           />
           <Box sx={{ p: { xs: 1.5, sm: 2 } }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-              <Avatar sx={{ mr: 1 }}>{opportunity.organization[0]}</Avatar>
+              <Avatar 
+                src={opportunity.image_url} 
+                sx={{ mr: 1 }}
+              >
+                {opportunity.organization[0]}
+              </Avatar>
               <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                 {opportunity.organization}
               </Typography>

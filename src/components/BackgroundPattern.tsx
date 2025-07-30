@@ -1,9 +1,8 @@
 import React from 'react';
-import { Box, useTheme, alpha } from '@mui/material';
+import { Box, alpha } from '@mui/material';
+import Dot from './Dot';
 
 const BackgroundPattern: React.FC = () => {
-  const theme = useTheme();
-
   return (
     <Box
       sx={{
@@ -18,6 +17,45 @@ const BackgroundPattern: React.FC = () => {
         pointerEvents: 'none',
       }}
     >
+      {/* Dot pattern using Dot component - positioned before gradient */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 0,
+        }}
+      >
+        <Dot
+          color={alpha('#8027ab', 0.8)}
+          size={1}
+          spacing={15}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            opacity: 1,
+          }}
+        />
+        <Dot
+          color={alpha('#8027ab', 0.6)}
+          size={1}
+          spacing={30}
+          style={{
+            position: 'absolute',
+            top: '8px',
+            left: '8px',
+            right: 0,
+            bottom: 0,
+            opacity: 1,
+          }}
+        />
+      </Box>
+
       {/* Gradient overlay */}
       <Box
         sx={{
@@ -26,27 +64,8 @@ const BackgroundPattern: React.FC = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'linear-gradient(135deg, rgba(251, 242, 255, 0.8) 0%, rgba(240, 230, 255, 0.8) 100%)',
+          background: 'linear-gradient(135deg, rgba(251, 242, 255, 0.5) 0%, rgba(240, 230, 255, 0.5) 100%)',
           zIndex: 1,
-        }}
-      />
-      
-      {/* Dot pattern */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: `
-            radial-gradient(circle at 1px 1px, ${alpha('#7211a2', 0.1)} 1px, transparent 0),
-            radial-gradient(circle at 1px 1px, ${alpha('#7211a2', 0.05)} 1px, transparent 0)
-          `,
-          backgroundSize: '40px 40px, 80px 80px',
-          backgroundPosition: '0 0, 20px 20px',
-          opacity: 0.5,
-          zIndex: 0,
         }}
       />
 

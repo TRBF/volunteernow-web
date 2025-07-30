@@ -45,7 +45,7 @@ export const opportunityService = {
         id: opportunity.id || '',
         title: opportunity.name || '', // API returns 'name' instead of 'title'
         description: opportunity.description || '',
-        image_url: getMediaUrl(opportunity.post_image), // Handle media URL
+        image_url: getMediaUrl(opportunity.profile_picture || opportunity.post_image), // Use profile_picture first, fallback to post_image
         location: opportunity.location || '',
         date: opportunity.time || '', // API returns 'time' instead of 'date'
         organization: opportunity.organization || 'VolunteerNow',
@@ -61,7 +61,7 @@ export const opportunityService = {
         id: data.id || '',
         title: data.name || '',
         description: data.description || '',
-        image_url: getMediaUrl(data.post_image),
+        image_url: getMediaUrl(data.profile_picture || data.post_image), // Use profile_picture first, fallback to post_image
         location: data.location || '',
         date: data.time || '',
         organization: data.organization || 'VolunteerNow',

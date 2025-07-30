@@ -23,6 +23,7 @@ const Callouts = React.lazy(() => import('./pages/Callouts'));
 const Applications = React.lazy(() => import('./pages/Applications'));
 const Archive = React.lazy(() => import('./pages/Archive'));
 const Apply = React.lazy(() => import('./pages/Apply'));
+const DotDemo = React.lazy(() => import('./components/DotDemo'));
 
 const LoadingFallback = () => (
   <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -76,6 +77,7 @@ const PrivateLayout = () => {
           <Route path="/callouts" element={<Callouts />} />
           <Route path="/applications" element={<Applications />} />
           <Route path="/archive" element={<Archive />} />
+          <Route path="/demo" element={<DotDemo />} />
         </Routes>
       </MainContent>
       <BottomNav />
