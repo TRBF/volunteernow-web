@@ -1,14 +1,14 @@
 import React, { Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
+import { AppThemeProvider } from './contexts/ThemeContext';
 import CssBaseline from '@mui/material/CssBaseline';
-import { theme } from './theme';
 import { authService } from './services/api';
 import BackgroundPattern from './components/BackgroundPattern';
 import { CircularProgress, Box, Fade } from '@mui/material';
 import PrivateRoute from './components/PrivateRoute';
 import Header from './components/Header';
 import BottomNav from './components/BottomNavigation';
+import { useTheme } from '@mui/material/styles';
 
 // Lazy load components
 const Login = React.lazy(() => import('./pages/Login'));
@@ -23,7 +23,6 @@ const Callouts = React.lazy(() => import('./pages/Callouts'));
 const Applications = React.lazy(() => import('./pages/Applications'));
 const Archive = React.lazy(() => import('./pages/Archive'));
 const Apply = React.lazy(() => import('./pages/Apply'));
-const DotDemo = React.lazy(() => import('./components/DotDemo'));
 
 const LoadingFallback = () => (
   <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -37,6 +36,7 @@ interface MainContentProps {
 
 const MainContent: React.FC<MainContentProps> = ({ children }) => {
   const location = useLocation();
+  const theme = useTheme();
   
   return (
     <Box
@@ -77,7 +77,6 @@ const PrivateLayout = () => {
           <Route path="/callouts" element={<Callouts />} />
           <Route path="/applications" element={<Applications />} />
           <Route path="/archive" element={<Archive />} />
-          <Route path="/demo" element={<DotDemo />} />
         </Routes>
       </MainContent>
       <BottomNav />
@@ -87,7 +86,7 @@ const PrivateLayout = () => {
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
+    <AppThemeProvider>
       <CssBaseline />
       <BackgroundPattern />
       <Suspense fallback={<LoadingFallback />}>
@@ -134,7 +133,7 @@ function App() {
           } />
         </Routes>
       </Suspense>
-    </ThemeProvider>
+    </AppThemeProvider>
   );
 }
 

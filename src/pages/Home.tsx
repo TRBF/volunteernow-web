@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import {
   Box,
   Container,
@@ -9,17 +8,28 @@ import {
 import { motion } from 'framer-motion';
 import Feed from '../components/Feed';
 import CalloutPanel from '../components/CalloutPanel';
-import Header from '../components/Header';
+import OpportunitySorting from '../components/OpportunitySorting';
 
 const Home = () => {
-  const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [sortConfig, setSortConfig] = useState({
+    sortBy: '',
+    sortOrder: 'asc' as 'asc' | 'desc',
+  });
+  const [locationFilter, setLocationFilter] = useState('');
+  const [dateFilter, setDateFilter] = useState('');
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
-  const handleSearchChange = async (query: string) => {
-    setSearchQuery(query);
+  const handleSortChange = (sortBy: string, sortOrder: 'asc' | 'desc') => {
+    setSortConfig({ sortBy, sortOrder });
+  };
+
+  const handleLocationFilterChange = (location: string) => {
+    setLocationFilter(location);
+  };
+
+  const handleDateFilterChange = (date: string) => {
+    setDateFilter(date);
   };
 
   return (
@@ -59,7 +69,12 @@ const Home = () => {
                 flexShrink: 0,
               }}
             >
-              <Feed />
+              <Feed 
+                sortBy={sortConfig.sortBy} 
+                sortOrder={sortConfig.sortOrder}
+                locationFilter={locationFilter}
+                dateFilter={dateFilter}
+              />
             </Box>
             <Box 
               sx={{ 
@@ -73,6 +88,14 @@ const Home = () => {
               }}
             >
               <CalloutPanel />
+              <OpportunitySorting 
+                onSortChange={handleSortChange}
+                onLocationFilterChange={handleLocationFilterChange}
+                onDateFilterChange={handleDateFilterChange}
+                currentSort={sortConfig}
+                locationFilter={locationFilter}
+                dateFilter={dateFilter}
+              />
             </Box>
           </Container>
         </Box>

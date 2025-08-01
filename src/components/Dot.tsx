@@ -29,22 +29,14 @@ interface DotProps {
   style?: React.CSSProperties;
 }
 
-function Placeholder() {
-  return (
-    <div className="flex h-full min-h-64 w-full min-w-72 items-center justify-center">
-      {/* <div className="rounded bg-white px-4 py-2">Content with dot background</div> */}
-    </div>
-  );
-}
-
 export default function Dot({
-  color = "#8027ab",
+  color = "#4f0c73",
   size = 1,
-  spacing = 10,
+  spacing = 20,
   children,
   className,
   style = {
-    backgroundColor: "white",
+    backgroundColor: "transparent",
   },
 }: DotProps) {
   return (
@@ -52,11 +44,11 @@ export default function Dot({
       style={{
         ...style,
         backgroundImage: `radial-gradient(${color} ${size}px, transparent ${size}px)`,
-        backgroundSize: `calc(${spacing} * ${size}px) calc(${spacing} * ${size}px)`,
+        backgroundSize: `${spacing}px ${spacing}px`,
       }}
       className={className}
     >
-      {children ?? <Placeholder />}
+      {children}
     </div>
   );
 } 

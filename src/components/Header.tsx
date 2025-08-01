@@ -39,6 +39,8 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService, searchService } from '../services/api';
+import { useTheme as useAppTheme } from '../contexts/ThemeContext';
+import ThemeToggleIcon from './ThemeToggleIcon';
 
 const MEDIA_BASE_URL = 'https://api.volunteernow.ro';
 
@@ -82,6 +84,7 @@ const Header: React.FC<HeaderProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
+  const { isDarkMode, toggleTheme } = useAppTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -194,7 +197,7 @@ const Header: React.FC<HeaderProps> = ({
             },
             left: 0,
             top: 0,
-            backgroundColor: 'white',
+            backgroundColor: 'background.paper',
             borderRight: '1px solid',
             borderColor: 'divider',
             display: 'flex',
@@ -334,6 +337,35 @@ const Header: React.FC<HeaderProps> = ({
           </List>
 
           <Box sx={{ mt: 'auto' }}>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={toggleTheme}
+                sx={{
+                  borderRadius: 2,
+                  minHeight: 48,
+                  px: isCollapsed ? 2 : 3,
+                  '&:hover': {
+                    backgroundColor: 'transparent',
+                  },
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 0, mr: isCollapsed ? 0 : 3 }}>
+                  <ThemeToggleIcon isDarkMode={isDarkMode} />
+                </ListItemIcon>
+                {!isCollapsed && (
+                  <ListItemText 
+                    primary={isDarkMode ? "Light Mode" : "Dark Mode"}
+                    primaryTypographyProps={{
+                      color: 'text.primary',
+                      sx: {
+                        fontSize: { xs: '0.875rem', sm: '1rem' },
+                      }
+                    }}
+                  />
+                )}
+              </ListItemButton>
+            </ListItem>
+            
             <ListItem disablePadding>
               <ListItemButton
                 onClick={handleLogout}
